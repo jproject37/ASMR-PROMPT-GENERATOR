@@ -1221,7 +1221,6 @@ Requirements: photorealistic photography, static composition, no people/animals,
     setCharCount('img-prompt-out','img-char-count',1070);
     document.getElementById('output-1').style.display='block';
     // Pre-fill step 3
-    document.getElementById('s3-topic').value = (getSelectedLoc() ? getSelectedLoc()+' - ' : '') + scene;
   } catch(e) {
     showErr(1,'Generation failed: '+e.message);
   } finally {
@@ -1317,9 +1316,19 @@ Respond ONLY with valid JSON — no markdown, no preamble:
   "extra_notes": "..."
 }`;
 
-  const imageDesc = state.ytImageB64 ? 'I have provided the video thumbnail/frame image. Analyze the visual scene carefully to craft highly specific and accurate metadata.' : 'No image provided — generate based on channel style.';
+  const sceneContext = document.getElementById('s1-scene') ? document.getElementById('s1-scene').value.trim() : '';
+  const locContext = getSelectedLoc ? getSelectedLoc() : '';
+  const timeContext = getSelectedTime ? getSelectedTime() : '';
+  const imgPromptContext = state.imgPrompt || '';
 
-  const user = `${imageDesc}
+  const user = `Generate highly clickable SEO-optimized YouTube metadata for an ASMR rain video.
+
+Context from production:
+${locContext ? 'Location type: '+locContext : ''}
+${timeContext ? 'Time of day: '+timeContext : ''}
+${sceneContext ? 'Scene: '+sceneContext : ''}
+${imgPromptContext ? 'Image prompt used: '+imgPromptContext.substring(0,200) : ''}
+${state.uploadedImageB64 ? '(Reference image has been uploaded for this scene)' : ''}
 
 Audience intent: ${intent}
 Video duration: ${duration}
@@ -1328,7 +1337,7 @@ Channel: ASMR Rain Cinematic
 Generate the most clickable, SEO-optimized YouTube metadata package possible.`;
 
   try {
-    const r = await callClaude(system, user, state.ytImageB64, state.ytImageType);
+    const r = await callClaude(system, user, null, null);
     state.ytTitle = r.title;
     state.ytHook = r.hook;
     state.ytDesc = r.description;
