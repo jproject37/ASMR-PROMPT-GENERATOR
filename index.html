@@ -1050,7 +1050,16 @@ function handleUploadYT(input) {
     document.getElementById('upload-placeholder-yt').style.display = 'none';
     const parts = src.split(',');
     state.ytImageB64 = parts[1];
-    state.ytImageType = file.type;
+    const headerYT = parts[0];
+    if (headerYT.includes('jpeg') || headerYT.includes('jpg')) {
+      state.ytImageType = 'image/jpeg';
+    } else if (headerYT.includes('png')) {
+      state.ytImageType = 'image/png';
+    } else if (headerYT.includes('webp')) {
+      state.ytImageType = 'image/webp';
+    } else {
+      state.ytImageType = file.type || 'image/jpeg';
+    }
   };
   reader.readAsDataURL(file);
 }
