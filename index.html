@@ -4,1495 +4,909 @@
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
 <title>ASMR Rain Cinematic · Prompt Studio</title>
-<link href="https://fonts.googleapis.com/css2?family=Cormorant+Garamond:ital,wght@0,300;0,400;1,300&family=DM+Mono:wght@300;400&family=Syne:wght@400;600;700&display=swap" rel="stylesheet">
+<link href="https://fonts.googleapis.com/css2?family=Cinzel:wght@400;600&family=Inter:wght@300;400;500;600&family=JetBrains+Mono:wght@400;500&display=swap" rel="stylesheet">
 <style>
-:root {
-  --bg: #07090d;
-  --s1: #0d1117;
-  --s2: #111820;
-  --s3: #16202c;
-  --border: #1d2d3e;
-  --border2: #243446;
-  --accent: #4fc3f7;
-  --accent-dim: rgba(79,195,247,0.12);
-  --teal: #4db6ac;
-  --gold: #c9a96e;
-  --green: #56c596;
-  --purple: #9c7fe0;
-  --text: #c8dce9;
-  --text-dim: #4a6880;
-  --text-bright: #e8f4fc;
-  --step-active: #4fc3f7;
-  --step-done: #56c596;
+*{box-sizing:border-box;margin:0;padding:0}
+:root{
+  --bg:#0a0e14;--surface:#111827;--surface2:#1a2235;--surface3:#0f1520;
+  --border:#1e2d40;--border2:#2a3f57;
+  --teal:#00c9a7;--teal2:#00a88a;--teal-dim:rgba(0,201,167,0.12);
+  --gold:#c9a84c;--gold-dim:rgba(201,168,76,0.1);
+  --text:#e8edf5;--text2:#8a9ab5;--text3:#4a5568;
+  --red:#e05c5c;--green:#4ade80;
 }
-* { margin:0; padding:0; box-sizing:border-box; }
-html { scroll-behavior: smooth; }
-body {
-  background: var(--bg);
-  color: var(--text);
-  font-family: 'DM Mono', monospace;
-  font-size: 13px;
-  min-height: 100vh;
-}
+body{background:var(--bg);color:var(--text);font-family:'Inter',sans-serif;font-size:14px;min-height:100vh}
+/* HEADER */
+.header{text-align:center;padding:40px 20px 20px;border-bottom:1px solid var(--border)}
+.header-brand{font-family:'Inter',sans-serif;font-size:11px;font-weight:500;letter-spacing:0.25em;color:var(--teal);text-transform:uppercase;margin-bottom:10px}
+.header h1{font-family:'Cinzel',serif;font-size:clamp(22px,4vw,36px);font-weight:600;letter-spacing:0.05em;color:var(--text)}
+.header h1 em{color:var(--teal);font-style:normal}
+.header-sub{font-size:12px;color:var(--text3);margin-top:6px;letter-spacing:0.1em}
 
-/* Rain BG */
-#rain-bg {
-  position: fixed; inset: 0;
-  pointer-events: none; z-index: 0;
-  opacity: 0.08;
-}
+/* API KEY */
+.api-bar{background:var(--surface3);border-bottom:1px solid var(--border);padding:12px 24px;display:flex;align-items:center;gap:12px}
+.api-label{font-size:11px;color:var(--text2);letter-spacing:0.1em;font-weight:500;white-space:nowrap}
+.api-input{flex:1;max-width:380px;background:var(--surface2);border:1px solid var(--border);color:var(--text);padding:7px 12px;font-family:'JetBrains Mono',monospace;font-size:12px;border-radius:4px;outline:none;transition:border-color .2s}
+.api-input:focus{border-color:var(--teal)}
+.api-status{font-size:11px;font-family:'JetBrains Mono',monospace;color:var(--text3)}
+.api-status.ok{color:var(--teal)}
 
-.wrap {
-  position: relative; z-index: 1;
-  max-width: 860px;
-  margin: 0 auto;
-  padding: 0 20px 100px;
-}
+/* TABS */
+.tabs{display:flex;border-bottom:1px solid var(--border);background:var(--surface3);overflow-x:auto}
+.tab{flex:1;min-width:120px;padding:14px 8px;text-align:center;cursor:pointer;border-right:1px solid var(--border);transition:all .2s;position:relative;background:transparent;border-top:none;border-left:none;border-bottom:none;color:var(--text3)}
+.tab:last-child{border-right:none}
+.tab .tab-num{display:block;font-family:'Cinzel',serif;font-size:10px;color:inherit;margin-bottom:3px;letter-spacing:0.1em}
+.tab .tab-label{display:block;font-size:11px;font-weight:600;letter-spacing:0.12em;text-transform:uppercase}
+.tab.active{color:var(--teal);background:var(--surface);border-bottom:2px solid var(--teal)}
+.tab.done{color:var(--text2)}
+.tab.done .tab-num{color:var(--teal)}
 
-/* Header */
-header {
-  text-align: center;
-  padding: 44px 0 48px;
-  border-bottom: 1px solid var(--border);
-  margin-bottom: 40px;
-}
-.brand-tag {
-  font-family: 'Syne', sans-serif;
-  font-size: 10px; font-weight: 600;
-  letter-spacing: 0.28em;
-  text-transform: uppercase;
-  color: var(--accent);
-  margin-bottom: 14px;
-  display: flex; align-items: center;
-  justify-content: center; gap: 10px;
-}
-.brand-tag::before, .brand-tag::after {
-  content: ''; width: 32px; height: 1px;
-  background: linear-gradient(to right, transparent, var(--accent));
-}
-.brand-tag::after { transform: scaleX(-1); }
-h1 {
-  font-family: 'Cormorant Garamond', serif;
-  font-size: clamp(28px, 4.5vw, 46px);
-  font-weight: 300; color: var(--text-bright);
-  letter-spacing: -0.01em;
-}
-h1 em { font-style: italic; color: var(--accent); }
-.sub {
-  margin-top: 10px;
-  color: var(--text-dim);
-  font-size: 11px; letter-spacing: 0.1em;
-}
+/* LAYOUT */
+.main{max-width:900px;margin:0 auto;padding:24px 16px}
+.panel{display:none}
+.panel.active{display:block}
 
-/* Step indicator */
-.steps-nav {
-  display: flex; gap: 0;
-  margin-bottom: 36px;
-  border: 1px solid var(--border);
-  border-radius: 3px;
-  overflow: hidden;
-}
-.step-tab {
-  flex: 1; padding: 12px 8px;
-  text-align: center;
-  font-family: 'Syne', sans-serif;
-  font-size: 10px; font-weight: 600;
-  letter-spacing: 0.14em;
-  text-transform: uppercase;
-  color: var(--text-dim);
-  background: var(--s1);
-  border-right: 1px solid var(--border);
-  cursor: pointer;
-  transition: all 0.2s;
-  user-select: none;
-}
-.step-tab:last-child { border-right: none; }
-.step-tab.active { color: var(--accent); background: var(--accent-dim); }
-.step-tab.done { color: var(--step-done); }
-.step-num {
-  display: block;
-  font-size: 16px; font-weight: 700;
-  font-family: 'Cormorant Garamond', serif;
-  margin-bottom: 2px;
-}
+/* SECTION CARD */
+.card{background:var(--surface);border:1px solid var(--border);border-radius:6px;margin-bottom:16px;overflow:hidden}
+.card-header{padding:12px 16px;border-bottom:1px solid var(--border);display:flex;align-items:center;gap:8px;background:var(--surface3)}
+.card-dot{width:7px;height:7px;border-radius:50%;background:var(--teal);flex-shrink:0}
+.card-dot.gold{background:var(--gold)}
+.card-title{font-size:11px;font-weight:600;letter-spacing:0.18em;text-transform:uppercase;color:var(--text2)}
+.card-body{padding:16px}
 
-/* Step panels */
-.step-panel { display: none; }
-.step-panel.active { display: block; }
+/* SCENE SETUP */
+.section-label{font-size:11px;font-weight:600;letter-spacing:0.15em;color:var(--text3);text-transform:uppercase;margin-bottom:10px}
+.chip-grid{display:flex;flex-wrap:wrap;gap:6px;margin-bottom:16px}
+.chip{padding:6px 12px;border:1px solid var(--border2);background:var(--surface2);color:var(--text2);font-size:12px;border-radius:4px;cursor:pointer;transition:all .15s;user-select:none}
+.chip:hover{border-color:var(--teal);color:var(--text)}
+.chip.active{border-color:var(--teal);background:var(--teal-dim);color:var(--teal)}
+.chip .icon{margin-right:4px}
 
-/* Card */
-.card {
-  background: var(--s1);
-  border: 1px solid var(--border);
-  border-radius: 3px;
-  margin-bottom: 16px;
-  overflow: hidden;
-}
-.card-head {
-  display: flex; align-items: center;
-  justify-content: space-between;
-  padding: 13px 18px;
-  background: var(--s2);
-  border-bottom: 1px solid var(--border);
-}
-.card-title {
-  font-family: 'Syne', sans-serif;
-  font-size: 10px; font-weight: 600;
-  letter-spacing: 0.2em; text-transform: uppercase;
-  color: var(--text-dim);
-  display: flex; align-items: center; gap: 8px;
-}
-.dot { width: 6px; height: 6px; border-radius: 50%; }
-.dot.blue { background: var(--accent); }
-.dot.teal { background: var(--teal); }
-.dot.gold { background: var(--gold); }
-.dot.green { background: var(--green); }
-.dot.purple { background: var(--purple); }
-.card-body { padding: 18px; }
+/* TEXT INPUTS */
+.text-input{width:100%;background:var(--surface2);border:1px solid var(--border);color:var(--text);padding:10px 14px;border-radius:4px;outline:none;font-family:'Inter',sans-serif;font-size:13px;transition:border-color .2s;resize:none}
+.text-input:focus{border-color:var(--teal)}
 
-/* Fields */
-.field { margin-bottom: 14px; }
-.field:last-child { margin-bottom: 0; }
-.field label {
-  display: block;
-  font-size: 10px; letter-spacing: 0.12em;
-  text-transform: uppercase; color: var(--text-dim);
-  margin-bottom: 7px;
-}
-.field input, .field select, .field textarea {
-  width: 100%;
-  background: var(--s3);
-  border: 1px solid var(--border2);
-  border-radius: 2px;
-  color: var(--text-bright);
-  font-family: 'DM Mono', monospace;
-  font-size: 13px;
-  padding: 9px 13px;
-  outline: none;
-  transition: border-color 0.2s, box-shadow 0.2s;
-}
-.field input:focus, .field select:focus, .field textarea:focus {
-  border-color: var(--accent);
-  box-shadow: 0 0 0 2px rgba(79,195,247,0.07);
-}
-.field select option { background: var(--s3); }
-.field textarea { resize: vertical; min-height: 70px; line-height: 1.6; }
-.row2 { display: grid; grid-template-columns: 1fr 1fr; gap: 12px; }
+/* SELECT */
+.select-input{background:var(--surface2);border:1px solid var(--border);color:var(--text);padding:8px 12px;border-radius:4px;outline:none;font-family:'Inter',sans-serif;font-size:13px;cursor:pointer;appearance:none;background-image:url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='12' height='8' fill='%238a9ab5'%3E%3Cpath d='M6 8L0 0h12z'/%3E%3C/svg%3E");background-repeat:no-repeat;background-position:right 12px center;padding-right:32px}
+.select-input:focus{border-color:var(--teal)}
 
-/* Char counter */
-.char-counter {
-  text-align: right;
-  font-size: 10px; margin-top: 5px;
-  letter-spacing: 0.06em;
-  transition: color 0.2s;
-}
-.char-counter.ok { color: var(--green); }
-.char-counter.warn { color: var(--gold); }
-.char-counter.over { color: #e57373; }
+/* RADIO PILLS */
+.radio-group{display:flex;flex-wrap:wrap;gap:6px}
+.radio-pill{padding:6px 14px;border:1px solid var(--border2);background:var(--surface2);color:var(--text2);font-size:12px;border-radius:100px;cursor:pointer;transition:all .15s}
+.radio-pill:hover{border-color:var(--teal);color:var(--text)}
+.radio-pill.active{border-color:var(--teal);background:var(--teal-dim);color:var(--teal);font-weight:600}
 
-/* Presets */
-.presets-row {
-  display: flex; flex-wrap: wrap; gap: 6px;
-  margin-bottom: 14px;
-}
-.presets-label {
-  width: 100%;
-  font-size: 10px; letter-spacing: 0.1em;
-  text-transform: uppercase; color: var(--text-dim);
-  margin-bottom: 4px;
-}
-.preset {
-  background: transparent;
-  border: 1px solid var(--border2);
-  border-radius: 2px;
-  color: var(--text-dim);
-  font-family: 'DM Mono', monospace;
-  font-size: 11px; padding: 4px 10px;
-  cursor: pointer; transition: all 0.15s;
-  letter-spacing: 0.03em;
-}
-.preset:hover { border-color: var(--accent); color: var(--accent); background: var(--accent-dim); }
+/* TOGGLE LOCKS */
+.toggle-locks{display:flex;flex-wrap:wrap;gap:8px;margin-bottom:14px}
+.lock-btn{display:flex;align-items:center;gap:6px;padding:7px 12px;border:1px solid var(--border2);background:var(--surface2);color:var(--text2);font-size:11px;font-weight:600;border-radius:4px;cursor:default;letter-spacing:0.08em}
+.lock-btn .lk{color:var(--gold)}
 
-/* Toggle grid */
-.toggle-section { margin-bottom: 16px; }
-.toggle-label {
-  font-size: 10px; letter-spacing: 0.12em;
-  text-transform: uppercase; color: var(--text-dim);
-  margin-bottom: 10px;
-}
-.toggle-grid {
-  display: grid;
-  grid-template-columns: repeat(auto-fill, minmax(200px, 1fr));
-  gap: 8px;
-}
-.toggle-btn {
-  display: flex; align-items: flex-start; gap: 10px;
-  background: var(--s3);
-  border: 1px solid var(--border2);
-  border-radius: 2px;
-  padding: 10px 12px;
-  cursor: pointer;
-  transition: all 0.15s;
-  text-align: left;
-  font-family: 'DM Mono', monospace;
-  color: var(--text-dim);
-}
-.toggle-btn:hover { border-color: var(--border2); background: var(--s2); }
-.toggle-btn.on {
-  border-color: var(--accent);
-  background: rgba(79,195,247,0.07);
-  color: var(--text-bright);
-}
-.toggle-check {
-  width: 14px; height: 14px;
-  border: 1px solid var(--border2);
-  border-radius: 2px;
-  flex-shrink: 0;
-  margin-top: 1px;
-  display: flex; align-items: center; justify-content: center;
-  font-size: 9px;
-  transition: all 0.15s;
-}
-.toggle-btn.on .toggle-check {
-  background: var(--accent);
-  border-color: var(--accent);
-  color: var(--bg);
-}
-.toggle-text { font-size: 11px; line-height: 1.45; letter-spacing: 0.02em; }
-.toggle-text strong { display: block; font-size: 12px; margin-bottom: 2px; }
+/* EFFECT GRID */
+.effect-grid{display:grid;grid-template-columns:repeat(auto-fill,minmax(200px,1fr));gap:8px;margin-bottom:14px}
+.effect-item{padding:10px 12px;border:1px solid var(--border);background:var(--surface2);border-radius:4px;cursor:pointer;transition:all .15s;display:flex;align-items:flex-start;gap:8px}
+.effect-item:hover{border-color:var(--border2)}
+.effect-item.active{border-color:var(--teal);background:var(--teal-dim)}
+.effect-cb{width:16px;height:16px;border:1px solid var(--border2);border-radius:3px;flex-shrink:0;margin-top:1px;display:flex;align-items:center;justify-content:center;font-size:10px;color:var(--teal);background:transparent;transition:all .15s}
+.effect-item.active .effect-cb{background:var(--teal);border-color:var(--teal);color:#000}
+.effect-name{font-size:12px;font-weight:600;color:var(--text);margin-bottom:2px}
+.effect-desc{font-size:11px;color:var(--text3)}
 
-/* Locked badges */
-.locked-row {
-  display: flex; flex-wrap: wrap; gap: 6px;
-  margin-bottom: 14px;
-}
-.locked-badge {
-  display: flex; align-items: center; gap: 6px;
-  background: rgba(86,197,150,0.07);
-  border: 1px solid rgba(86,197,150,0.25);
-  border-radius: 2px;
-  color: var(--green);
-  font-size: 11px; padding: 5px 11px;
-  letter-spacing: 0.04em;
-}
-.locked-badge::before { content: '🔒'; font-size: 10px; }
+/* UPLOAD ZONE */
+.upload-zone{border:2px dashed var(--border2);border-radius:6px;padding:32px;text-align:center;cursor:pointer;transition:all .2s;position:relative;overflow:hidden;min-height:180px;display:flex;flex-direction:column;align-items:center;justify-content:center;gap:8px}
+.upload-zone:hover,.upload-zone.drag{border-color:var(--teal);background:var(--teal-dim)}
+.upload-zone img{max-width:100%;max-height:260px;border-radius:4px;object-fit:contain}
+.upload-icon{font-size:28px;opacity:.4}
+.upload-text{font-size:13px;color:var(--text2)}
+.upload-text span{color:var(--teal);font-weight:600;text-decoration:underline;text-underline-offset:2px}
+.upload-hint{font-size:11px;color:var(--text3)}
+.upload-zone input{position:absolute;inset:0;opacity:0;cursor:pointer}
 
-/* Upload zone */
-.upload-zone {
-  border: 2px dashed var(--border2);
-  border-radius: 3px;
-  padding: 36px 20px;
-  text-align: center;
-  cursor: pointer;
-  transition: all 0.2s;
-  background: var(--s3);
-  position: relative;
-}
-.upload-zone:hover, .upload-zone.drag { border-color: var(--accent); background: var(--accent-dim); }
-.upload-zone input { position: absolute; inset: 0; opacity: 0; cursor: pointer; }
-.upload-icon { font-size: 28px; margin-bottom: 10px; }
-.upload-hint { color: var(--text-dim); font-size: 12px; letter-spacing: 0.06em; }
-.upload-hint strong { color: var(--accent); }
-.preview-img {
-  max-width: 100%; max-height: 280px;
-  border-radius: 2px; display: block;
-  margin: 0 auto; object-fit: contain;
-}
+/* GENERATE BTN */
+.gen-btn{width:100%;padding:15px;background:transparent;border:1px solid var(--teal);color:var(--teal);font-family:'Inter',sans-serif;font-size:13px;font-weight:600;letter-spacing:0.2em;text-transform:uppercase;border-radius:4px;cursor:pointer;transition:all .2s;display:flex;align-items:center;justify-content:center;gap:8px}
+.gen-btn:hover:not(:disabled){background:var(--teal);color:#000}
+.gen-btn:disabled{opacity:.4;cursor:not-allowed}
+.gen-btn .hex{font-size:16px}
+.gen-btn.loading{border-color:var(--teal2);color:var(--teal2)}
 
-/* Output area */
-.output-area {
-  background: var(--s3);
-  border: 1px solid var(--border2);
-  border-radius: 2px;
-  padding: 14px;
-  color: var(--text-bright);
-  font-size: 12.5px;
-  line-height: 1.75;
-  white-space: pre-wrap;
-  word-break: break-word;
-  min-height: 80px;
-  font-family: 'DM Mono', monospace;
-}
-.output-area.empty { color: var(--text-dim); font-style: italic; }
+/* OUTPUT BOXES */
+.output-box{position:relative;background:var(--surface3);border:1px solid var(--border);border-radius:4px;padding:16px;margin-top:8px}
+.output-text{font-family:'JetBrains Mono',monospace;font-size:12px;color:var(--text);line-height:1.7;white-space:pre-wrap;word-break:break-word;min-height:40px}
+.output-text.title-text{font-family:'Cinzel',serif;font-size:16px;font-weight:600;color:var(--text);letter-spacing:0.02em;line-height:1.5;white-space:normal}
+.output-text.hook-text{font-family:'Cinzel',serif;font-size:22px;font-weight:400;color:var(--gold);text-align:center;font-style:italic;padding:8px 0;white-space:normal}
+.copy-btn{position:absolute;top:10px;right:10px;padding:4px 10px;background:transparent;border:1px solid var(--border2);color:var(--text3);font-size:10px;font-weight:600;letter-spacing:0.1em;text-transform:uppercase;border-radius:3px;cursor:pointer;transition:all .15s}
+.copy-btn:hover{border-color:var(--teal);color:var(--teal)}
+.copy-btn.copied{border-color:var(--teal);color:var(--teal)}
 
-.tags-area {
-  display: flex; flex-wrap: wrap; gap: 6px;
-  background: var(--s3); border: 1px solid var(--border2);
-  border-radius: 2px; padding: 12px; min-height: 52px;
-}
-.tag-chip {
-  background: rgba(79,195,247,0.07);
-  border: 1px solid rgba(79,195,247,0.22);
-  border-radius: 2px;
-  color: var(--accent);
-  font-size: 11px; padding: 3px 9px;
-}
+/* TAGS */
+.tags-box{display:flex;flex-wrap:wrap;gap:6px;padding:12px;background:var(--surface3);border:1px solid var(--border);border-radius:4px;min-height:50px}
+.tag-item{padding:4px 10px;background:var(--surface2);border:1px solid var(--border2);border-radius:100px;font-size:11px;color:var(--text2)}
 
-.hook-big {
-  font-family: 'Cormorant Garamond', serif;
-  font-size: 26px; font-weight: 300;
-  font-style: italic;
-  text-align: center;
-  color: var(--text-bright);
-  padding: 18px 12px;
-  letter-spacing: 0.04em;
-}
+/* NEXT BTN */
+.next-btn{display:inline-flex;align-items:center;gap:6px;padding:9px 18px;background:transparent;border:1px solid var(--border2);color:var(--text2);font-size:12px;font-weight:600;letter-spacing:0.12em;text-transform:uppercase;border-radius:4px;cursor:pointer;transition:all .2s;margin-top:10px}
+.next-btn:hover{border-color:var(--teal);color:var(--teal)}
+.next-btn.primary{border-color:var(--teal);color:var(--teal)}
 
-/* Buttons */
-.btn {
-  display: inline-flex; align-items: center;
-  justify-content: center; gap: 8px;
-  font-family: 'Syne', sans-serif;
-  font-size: 11px; font-weight: 600;
-  letter-spacing: 0.18em; text-transform: uppercase;
-  border-radius: 2px; cursor: pointer;
-  transition: all 0.18s; border: none; outline: none;
-  padding: 12px 22px;
-}
-.btn-primary {
-  background: transparent;
-  border: 1px solid var(--accent);
-  color: var(--accent);
-  position: relative; overflow: hidden;
-}
-.btn-primary::before {
-  content: ''; position: absolute; inset: 0;
-  background: var(--accent);
-  transform: scaleX(0); transform-origin: left;
-  transition: transform 0.22s ease; z-index: 0;
-}
-.btn-primary:hover::before { transform: scaleX(1); }
-.btn-primary:hover { color: var(--bg); }
-.btn-primary span { position: relative; z-index: 1; }
-.btn-primary:disabled { opacity: 0.35; cursor: not-allowed; }
-.btn-primary:disabled::before { display: none; }
-.btn-primary:disabled:hover { color: var(--accent); }
+/* ALL OUTPUT */
+.all-output-item{background:var(--surface);border:1px solid var(--border);border-radius:6px;margin-bottom:12px;overflow:hidden}
+.all-output-header{padding:10px 16px;background:var(--surface3);border-bottom:1px solid var(--border);display:flex;align-items:center;justify-content:space-between}
+.all-output-label{font-size:11px;font-weight:600;letter-spacing:0.15em;text-transform:uppercase;color:var(--text2)}
+.all-output-body{padding:16px}
 
-.btn-copy {
-  background: transparent;
-  border: 1px solid var(--border2);
-  color: var(--text-dim); font-size: 10px;
-  padding: 5px 12px; letter-spacing: 0.1em;
-}
-.btn-copy:hover { border-color: var(--accent); color: var(--accent); }
-.btn-copy.copied { border-color: var(--green); color: var(--green); }
+/* THUMBNAIL PROMPT SPECIAL */
+.thumb-prompt{background:linear-gradient(135deg,rgba(201,168,76,0.08) 0%,rgba(0,201,167,0.05) 100%);border:1px solid var(--gold);border-radius:4px;padding:16px;margin-top:8px}
+.thumb-prompt-text{font-family:'JetBrains Mono',monospace;font-size:12px;color:var(--text);line-height:1.7;white-space:pre-wrap}
 
-.btn-next {
-  background: transparent;
-  border: 1px solid var(--teal);
-  color: var(--teal);
-  position: relative; overflow: hidden;
-}
-.btn-next::before {
-  content: ''; position: absolute; inset: 0;
-  background: var(--teal);
-  transform: scaleX(0); transform-origin: left;
-  transition: transform 0.22s ease; z-index: 0;
-}
-.btn-next:hover::before { transform: scaleX(1); }
-.btn-next:hover { color: var(--bg); }
-.btn-next span { position: relative; z-index: 1; }
+/* STATUS */
+.status-row{display:flex;align-items:center;gap:8px;padding:10px 0;font-size:12px;color:var(--text2)}
+.status-dot{width:8px;height:8px;border-radius:50%;flex-shrink:0}
+.status-dot.running{background:var(--teal);animation:pulse 1s infinite}
+.status-dot.done{background:var(--teal)}
+.status-dot.pending{background:var(--text3)}
+.status-dot.error{background:var(--red)}
+@keyframes pulse{0%,100%{opacity:1}50%{opacity:.3}}
 
-.btn-row {
-  display: flex; gap: 10px; align-items: center;
-  flex-wrap: wrap; margin-top: 16px;
-}
-.btn-full { width: 100%; }
+/* PROGRESS */
+.progress-wrap{margin-bottom:20px;padding:16px;background:var(--surface3);border:1px solid var(--border);border-radius:6px}
+.progress-title{font-size:12px;font-weight:600;color:var(--teal);letter-spacing:0.1em;margin-bottom:12px}
+.progress-steps{display:flex;flex-direction:column;gap:8px}
 
-/* Loading */
-.loading {
-  display: none; text-align: center;
-  padding: 24px; color: var(--text-dim);
-  font-size: 12px; letter-spacing: 0.08em;
-}
-.loading.on { display: block; }
-.dots { display: inline-flex; gap: 4px; margin-bottom: 10px; }
-.dots span {
-  width: 4px; height: 4px; border-radius: 50%;
-  background: var(--accent);
-  animation: pulse 1.2s ease infinite;
-}
-.dots span:nth-child(2) { animation-delay: 0.2s; }
-.dots span:nth-child(3) { animation-delay: 0.4s; }
-@keyframes pulse { 0%,80%,100%{transform:scale(0.5);opacity:0.3} 40%{transform:scale(1);opacity:1} }
+/* 2-col */
+.two-col{display:grid;grid-template-columns:1fr 1fr;gap:12px}
+@media(max-width:600px){.two-col{grid-template-columns:1fr}.tabs .tab-label{font-size:9px}}
 
-/* Error */
-.err {
-  display: none; background: rgba(229,115,115,0.07);
-  border: 1px solid rgba(229,115,115,0.25);
-  border-radius: 2px; color: #e57373;
-  font-size: 12px; padding: 11px 15px;
-  margin-top: 12px; letter-spacing: 0.04em;
-}
-.err.on { display: block; }
-
-/* Divider */
-.divider {
-  height: 1px; background: var(--border);
-  margin: 20px 0;
-}
-
-/* Section within card */
-.sub-section { margin-bottom: 20px; }
-.sub-section:last-child { margin-bottom: 0; }
-.sub-title {
-  font-size: 10px; letter-spacing: 0.14em;
-  text-transform: uppercase; color: var(--text-dim);
-  margin-bottom: 10px;
-  display: flex; align-items: center; gap: 8px;
-}
-.sub-title::after {
-  content: ''; flex: 1; height: 1px;
-  background: var(--border);
-}
-
-/* Fade in */
-.fade-in { animation: fadeUp 0.3s ease both; }
-@keyframes fadeUp { from{opacity:0;transform:translateY(10px)} to{opacity:1;transform:translateY(0)} }
-
-/* Responsive */
-@media(max-width:600px) {
-  .row2 { grid-template-columns: 1fr; }
-  .toggle-grid { grid-template-columns: 1fr 1fr; }
-  .steps-nav { flex-wrap: wrap; }
-  .step-tab { min-width: 50%; }
-}
+/* HINT */
+.hint{font-size:11px;color:var(--text3);margin-top:6px;line-height:1.5}
+.badge{display:inline-block;padding:2px 7px;font-size:10px;font-weight:700;border-radius:3px;letter-spacing:0.08em}
+.badge.new{background:rgba(0,201,167,0.15);color:var(--teal);border:1px solid rgba(0,201,167,0.3)}
 </style>
 </head>
 <body>
 
-<canvas id="rain-bg"></canvas>
+<div class="header">
+  <div class="header-brand">ASMR Rain Cinematic</div>
+  <h1>Prompt <em>Studio</em></h1>
+  <div class="header-sub">Image Generation · Video Prompt · YouTube Package</div>
+</div>
 
-<div class="wrap">
-  <header>
-    <div class="brand-tag">ASMR Rain Cinematic</div>
-    <h1>Prompt <em>Studio</em></h1>
-    <p class="sub">Image Generation · Video Prompt · YouTube Package</p>
-  </header>
+<div class="api-bar">
+  <span class="api-label">🔑 API Key</span>
+  <input class="api-input" type="password" id="apiKeyInput" placeholder="sk-ant-..." autocomplete="off">
+  <span class="api-status" id="apiStatus">Enter key to enable AI generation</span>
+</div>
 
-  <!-- API Key Bar -->
-  <div style="background:var(--s2);border:1px solid var(--border);border-radius:3px;padding:12px 16px;margin-bottom:20px;display:flex;align-items:center;gap:12px;">
-    <span style="font-family:'Syne',sans-serif;font-size:10px;font-weight:600;letter-spacing:0.15em;text-transform:uppercase;color:var(--text-dim);white-space:nowrap;">🔑 API Key</span>
-    <input type="password" id="api-key-input" placeholder="Paste Anthropic API key kamu di sini (sk-ant-...)" 
-      style="flex:1;background:var(--s3);border:1px solid var(--border2);border-radius:2px;color:var(--text-bright);font-family:'DM Mono',monospace;font-size:12px;padding:8px 12px;outline:none;"
-      oninput="saveApiKey(this.value)" />
-    <span id="api-key-status" style="font-size:11px;color:var(--text-dim);white-space:nowrap;"></span>
+<div class="tabs">
+  <button class="tab active" data-tab="0" onclick="switchTab(0)">
+    <span class="tab-num">1</span>
+    <span class="tab-label">Image Prompt</span>
+  </button>
+  <button class="tab" data-tab="1" onclick="switchTab(1)">
+    <span class="tab-num">2</span>
+    <span class="tab-label">Video + YouTube</span>
+  </button>
+  <button class="tab" data-tab="2" onclick="switchTab(2)">
+    <span class="tab-num">3</span>
+    <span class="tab-label">All Output</span>
+  </button>
+</div>
+
+<!-- ===================== TAB 1: IMAGE PROMPT ===================== -->
+<div class="main panel active" id="panel-0">
+
+  <div class="card">
+    <div class="card-header"><div class="card-dot"></div><span class="card-title">Scene Setup</span></div>
+    <div class="card-body">
+
+      <div class="section-label">Tipe Lokasi — pilih satu atau lebih</div>
+      <div class="chip-grid" id="locationChips">
+        <div class="chip" data-val="Mountain scenery" onclick="toggleChip(this)"><span class="icon">🏔</span> Pegunungan</div>
+        <div class="chip" data-val="Waterfall" onclick="toggleChip(this)"><span class="icon">💧</span> Air Terjun</div>
+        <div class="chip" data-val="River / Stream" onclick="toggleChip(this)"><span class="icon">🌊</span> Sungai</div>
+        <div class="chip" data-val="Lake" onclick="toggleChip(this)"><span class="icon">🪷</span> Danau</div>
+        <div class="chip" data-val="Forest / Jungle" onclick="toggleChip(this)"><span class="icon">🌲</span> Hutan</div>
+        <div class="chip" data-val="Rolling Hills" onclick="toggleChip(this)"><span class="icon">🌄</span> Perbukitan</div>
+        <div class="chip" data-val="Beach / Coastal" onclick="toggleChip(this)"><span class="icon">🏖</span> Pantai</div>
+        <div class="chip" data-val="Urban / City" onclick="toggleChip(this)"><span class="icon">🏙</span> Perkotaan</div>
+      </div>
+
+      <div class="section-label">Scene Description</div>
+      <textarea class="text-input" id="sceneDesc" rows="2" placeholder="e.g. Traditional Balinese cottage with bamboo walls, hanging lanterns, surrounded by tropical jungle..."></textarea>
+
+      <div class="two-col" style="margin-top:14px">
+        <div>
+          <div class="section-label">Rain Intensity</div>
+          <div class="radio-group" id="rainIntensity">
+            <div class="radio-pill active" data-val="very heavy continuous rain, thick rain curtains, rain streaks dominate the frame" onclick="setRadio(this,'rainIntensity')">Heavy Pouring</div>
+            <div class="radio-pill" data-val="steady moderate rainfall, consistent rain drops" onclick="setRadio(this,'rainIntensity')">Steady Moderate</div>
+            <div class="radio-pill" data-val="gentle misty drizzle, soft atmospheric haze" onclick="setRadio(this,'rainIntensity')">Gentle Drizzle</div>
+            <div class="radio-pill" data-val="light scattered rainfall, occasional drops" onclick="setRadio(this,'rainIntensity')">Light Scattered</div>
+          </div>
+        </div>
+        <div>
+          <div class="section-label">Mood / Atmosphere</div>
+          <div class="radio-group" id="moodGroup">
+            <div class="radio-pill active" data-val="cozy intimate warm atmosphere" onclick="setRadio(this,'moodGroup')">Cozy & Intimate</div>
+            <div class="radio-pill" data-val="melancholic cinematic dramatic mood" onclick="setRadio(this,'moodGroup')">Melancholic</div>
+            <div class="radio-pill" data-val="serene meditative peaceful calm" onclick="setRadio(this,'moodGroup')">Serene</div>
+            <div class="radio-pill" data-val="mysterious moody atmospheric" onclick="setRadio(this,'moodGroup')">Mysterious</div>
+            <div class="radio-pill" data-val="warm nostalgic golden memories" onclick="setRadio(this,'moodGroup')">Warm & Nostalgic</div>
+          </div>
+        </div>
+      </div>
+
+      <div class="two-col" style="margin-top:14px">
+        <div>
+          <div class="section-label">Lighting</div>
+          <div class="radio-group" id="lightGroup">
+            <div class="radio-pill active" data-val="warm interior glow from windows, amber light" onclick="setRadio(this,'lightGroup')">Warm Interior</div>
+            <div class="radio-pill" data-val="cool blue moonlight, silver light through clouds" onclick="setRadio(this,'lightGroup')">Moonlight</div>
+            <div class="radio-pill" data-val="neon reflections on wet surfaces, city glow" onclick="setRadio(this,'lightGroup')">Neon Reflections</div>
+            <div class="radio-pill" data-val="soft overcast diffused grey light" onclick="setRadio(this,'lightGroup')">Soft Overcast</div>
+            <div class="radio-pill" data-val="golden hour fading light, warm orange tones" onclick="setRadio(this,'lightGroup')">Golden Hour</div>
+            <div class="radio-pill" data-val="candle and lantern light, flickering warm glow" onclick="setRadio(this,'lightGroup')">Candle & Lantern</div>
+          </div>
+        </div>
+        <div>
+          <div class="section-label">Waktu / Time of Day</div>
+          <div class="chip-grid" id="timeChips">
+            <div class="chip" data-val="early morning, dawn light" onclick="toggleSingleChip(this,'timeChips')"><span class="icon">🌅</span> Pagi</div>
+            <div class="chip" data-val="midday overcast" onclick="toggleSingleChip(this,'timeChips')"><span class="icon">☁️</span> Siang</div>
+            <div class="chip active" data-val="evening dusk, fading light" onclick="toggleSingleChip(this,'timeChips')"><span class="icon">🌇</span> Sore</div>
+            <div class="chip" data-val="night, darkness, artificial light only" onclick="toggleSingleChip(this,'timeChips')"><span class="icon">🌙</span> Malam</div>
+          </div>
+        </div>
+      </div>
+
+      <div style="margin-top:14px">
+        <div class="section-label">Additional Detail (optional)</div>
+        <textarea class="text-input" id="additionalDetail" rows="2" placeholder="e.g. wooden deck, warm light from inside, moss-covered stone path..."></textarea>
+      </div>
+    </div>
   </div>
 
-  <!-- Step nav -->
-  <div class="steps-nav">
-    <div class="step-tab active" id="tab-1" onclick="goStep(1)">
-      <span class="step-num">1</span>Image Prompt
-    </div>
-    <div class="step-tab" id="tab-2" onclick="goStep(2)">
-      <span class="step-num">2</span>Video Prompt
-    </div>
-    <div class="step-tab" id="tab-3" onclick="goStep(3)">
-      <span class="step-num">3</span>YouTube Package
-    </div>
-    <div class="step-tab" id="tab-4" onclick="goStep(4)">
-      <span class="step-num">4</span>All Output
+  <button class="gen-btn" id="genImgBtn" onclick="generateImagePrompt()">
+    <span class="hex">⬡</span> Generate GPT+ Image Prompt
+  </button>
+
+  <div class="card" style="margin-top:16px">
+    <div class="card-header"><div class="card-dot gold"></div><span class="card-title">GPT+ Image Prompt</span></div>
+    <div class="card-body">
+      <div class="output-box">
+        <div class="output-text" id="imagePromptOutput">—</div>
+        <button class="copy-btn" onclick="copyOutput('imagePromptOutput',this)">COPY</button>
+      </div>
+      <p class="hint">Generate image in GPT+, then continue to Step 2 →</p>
+      <button class="next-btn primary" onclick="switchTab(1)">→ Next: Video + YouTube Package</button>
     </div>
   </div>
 
-  <!-- ========== STEP 1: GPT+ Image Prompt ========== -->
-  <div class="step-panel active" id="panel-1">
+</div>
+
+<!-- ===================== TAB 2: VIDEO + YOUTUBE (MERGED) ===================== -->
+<div class="main panel" id="panel-1">
+
+  <div class="card">
+    <div class="card-header">
+      <div class="card-dot"></div>
+      <span class="card-title">Upload Image</span>
+      <span class="badge new" style="margin-left:8px">Auto-generates everything</span>
+    </div>
+    <div class="card-body">
+      <div class="upload-zone" id="uploadZone2" ondrop="handleDrop(event,'img2')" ondragover="handleDragOver(event)" ondragleave="handleDragLeave(event)">
+        <input type="file" accept="image/*" onchange="handleFileSelect(event,'img2')">
+        <div id="uploadPlaceholder2">
+          <div class="upload-icon">🎬</div>
+          <div class="upload-text">Drop your GPT+ image here or <span>click to browse</span></div>
+          <div class="upload-hint">JPG, PNG, WEBP · AI akan analisis & generate semua output sekaligus</div>
+        </div>
+        <img id="previewImg2" style="display:none;max-width:100%;max-height:260px;border-radius:4px">
+      </div>
+    </div>
+  </div>
+
+  <!-- Effect Toggles -->
+  <div class="card">
+    <div class="card-header"><div class="card-dot"></div><span class="card-title">Effect Toggles</span></div>
+    <div class="card-body">
+      <div class="toggle-locks">
+        <div class="lock-btn"><span class="lk">🔒</span> Super Static Camera</div>
+        <div class="lock-btn"><span class="lk">🔒</span> No Human Voice</div>
+        <div class="lock-btn"><span class="lk">🔒</span> No Song / No Music</div>
+      </div>
+
+      <div class="section-label">Visual Effects</div>
+      <div class="effect-grid" id="visualEffects">
+        <div class="effect-item active" data-val="very heavy downpour, thick rain streaks clearly visible throughout frame" onclick="toggleEffect(this)">
+          <div class="effect-cb">✓</div>
+          <div><div class="effect-name">Heavy Rain</div><div class="effect-desc">Very heavy downpour, rain streaks clearly visible</div></div>
+        </div>
+        <div class="effect-item active" data-val="strong wind 50kph, trees leaves and branches swaying intensely" onclick="toggleEffect(this)">
+          <div class="effect-cb">✓</div>
+          <div><div class="effect-name">Strong Wind 50kph</div><div class="effect-desc">Trees, leaves, branches sway intensely</div></div>
+        </div>
+        <div class="effect-item active" data-val="dark storm clouds drifting slowly to the left" onclick="toggleEffect(this)">
+          <div class="effect-cb">✓</div>
+          <div><div class="effect-name">Clouds Moving Left</div><div class="effect-desc">Dark storm clouds drifting left</div></div>
+        </div>
+        <div class="effect-item" data-val="boat or floating object naturally rocking on water surface" onclick="toggleEffect(this)">
+          <div class="effect-cb"></div>
+          <div><div class="effect-name">Floating Object</div><div class="effect-desc">Boat / object naturally rocking on water</div></div>
+        </div>
+        <div class="effect-item" data-val="rain hitting puddles creating concentric ripple rings" onclick="toggleEffect(this)">
+          <div class="effect-cb"></div>
+          <div><div class="effect-name">Puddle Ripples</div><div class="effect-desc">Rain hitting puddles creating ripple rings</div></div>
+        </div>
+        <div class="effect-item" data-val="low mist and fog drifting slowly across ground or water surface" onclick="toggleEffect(this)">
+          <div class="effect-cb"></div>
+          <div><div class="effect-name">Rising Mist / Fog</div><div class="effect-desc">Low mist drifting across ground or water</div></div>
+        </div>
+        <div class="effect-item" data-val="chimney smoke gently rising and dispersing in wind" onclick="toggleEffect(this)">
+          <div class="effect-cb"></div>
+          <div><div class="effect-name">Chimney Smoke</div><div class="effect-desc">Smoke gently rising from chimney</div></div>
+        </div>
+        <div class="effect-item" data-val="wet reflective surfaces, puddles on road stone or wood" onclick="toggleEffect(this)">
+          <div class="effect-cb"></div>
+          <div><div class="effect-name">Wet Surfaces</div><div class="effect-desc">Reflective puddles on road / stone / wood</div></div>
+        </div>
+      </div>
+
+      <div class="section-label">Sound Atmosphere</div>
+      <div class="effect-grid" id="soundEffects">
+        <div class="effect-item active" data-val="heavy comfortable rain ambience sound 50-60% volume" onclick="toggleEffect(this)">
+          <div class="effect-cb">✓</div>
+          <div><div class="effect-name">Cozy Rain Sound</div><div class="effect-desc">Heavy comfortable rain ambience</div></div>
+        </div>
+        <div class="effect-item active" data-val="faint distant ocean waves in background 25-30% volume" onclick="toggleEffect(this)">
+          <div class="effect-cb">✓</div>
+          <div><div class="effect-name">Distant Ocean Waves</div><div class="effect-desc">Faint wave sounds in background</div></div>
+        </div>
+        <div class="effect-item" data-val="flowing river or stream water sound nearby" onclick="toggleEffect(this)">
+          <div class="effect-cb"></div>
+          <div><div class="effect-name">River / Stream</div><div class="effect-desc">Sound of flowing water nearby</div></div>
+        </div>
+        <div class="effect-item" data-val="leaves rustling in wind sound" onclick="toggleEffect(this)">
+          <div class="effect-cb"></div>
+          <div><div class="effect-name">Leaves Rustling</div><div class="effect-desc">Wind through foliage sound</div></div>
+        </div>
+        <div class="effect-item" data-val="continuous roaring waterfall sound nearby" onclick="toggleEffect(this)">
+          <div class="effect-cb"></div>
+          <div><div class="effect-name">Waterfall Sound</div><div class="effect-desc">Continuous roaring waterfall nearby</div></div>
+        </div>
+        <div class="effect-item active" data-val="STRICTLY no thunder sound whatsoever at any moment" onclick="toggleEffect(this)">
+          <div class="effect-cb">✓</div>
+          <div><div class="effect-name">🚫 No Thunder</div><div class="effect-desc">Strictly no thunder sound at all</div></div>
+        </div>
+      </div>
+
+      <div class="section-label">Manual Addition</div>
+      <textarea class="text-input" id="manualAddition" rows="2" placeholder="Custom scene elements..."></textarea>
+    </div>
+  </div>
+
+  <!-- YouTube Settings -->
+  <div class="card">
+    <div class="card-header"><div class="card-dot gold"></div><span class="card-title">YouTube Settings</span></div>
+    <div class="card-body">
+      <div class="two-col">
+        <div>
+          <div class="section-label">Primary Audience Intent</div>
+          <select class="select-input" id="audienceIntent" style="width:100%">
+            <option>Sleep & Relaxation</option>
+            <option>Study & Focus</option>
+            <option>Meditation</option>
+            <option>Work From Home</option>
+            <option>Anxiety Relief</option>
+          </select>
+        </div>
+        <div>
+          <div class="section-label">Video Duration</div>
+          <select class="select-input" id="videoDuration" style="width:100%">
+            <option>1 Hour</option>
+            <option>2 Hours</option>
+            <option>3 Hours</option>
+            <option>8 Hours (Overnight)</option>
+          </select>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <button class="gen-btn" id="genAllBtn" onclick="generateAll()">
+    <span class="hex">⬡</span> Generate Video Prompt + Full YouTube Package
+  </button>
+
+  <!-- Progress -->
+  <div class="progress-wrap" id="progressWrap" style="display:none;margin-top:16px">
+    <div class="progress-title">Generating all outputs...</div>
+    <div class="progress-steps" id="progressSteps"></div>
+  </div>
+
+  <!-- OUTPUTS -->
+  <div id="videoOutputSection" style="display:none;margin-top:16px">
 
     <div class="card">
-      <div class="card-head">
-        <div class="card-title"><span class="dot blue"></span>Scene Setup</div>
-      </div>
+      <div class="card-header"><div class="card-dot"></div><span class="card-title">SeeDance 2.0 Prompt</span></div>
       <div class="card-body">
-
-        <div class="toggle-section">
-          <div class="toggle-label">Tipe Lokasi — pilih satu atau lebih</div>
-          <div class="toggle-grid" style="grid-template-columns:repeat(4,1fr);">
-            <div class="toggle-btn" data-loc="pegunungan" onclick="toggleLoc(this)">
-              <div class="toggle-check"></div>
-              <div class="toggle-text"><strong>🏔 Pegunungan</strong>Mountain scenery</div>
-            </div>
-            <div class="toggle-btn" data-loc="air terjun" onclick="toggleLoc(this)">
-              <div class="toggle-check"></div>
-              <div class="toggle-text"><strong>💧 Air Terjun</strong>Waterfall</div>
-            </div>
-            <div class="toggle-btn" data-loc="sungai" onclick="toggleLoc(this)">
-              <div class="toggle-check"></div>
-              <div class="toggle-text"><strong>🌊 Sungai</strong>River / Stream</div>
-            </div>
-            <div class="toggle-btn" data-loc="danau" onclick="toggleLoc(this)">
-              <div class="toggle-check"></div>
-              <div class="toggle-text"><strong>🪷 Danau</strong>Lake</div>
-            </div>
-            <div class="toggle-btn" data-loc="hutan" onclick="toggleLoc(this)">
-              <div class="toggle-check"></div>
-              <div class="toggle-text"><strong>🌲 Hutan</strong>Forest / Jungle</div>
-            </div>
-            <div class="toggle-btn" data-loc="perbukitan" onclick="toggleLoc(this)">
-              <div class="toggle-check"></div>
-              <div class="toggle-text"><strong>🌄 Perbukitan</strong>Rolling Hills</div>
-            </div>
-            <div class="toggle-btn" data-loc="pantai" onclick="toggleLoc(this)">
-              <div class="toggle-check"></div>
-              <div class="toggle-text"><strong>🏖 Pantai</strong>Beach / Coastal</div>
-            </div>
-            <div class="toggle-btn" data-loc="perkotaan" onclick="toggleLoc(this)">
-              <div class="toggle-check"></div>
-              <div class="toggle-text"><strong>🏙 Perkotaan</strong>Urban / City</div>
-            </div>
-          </div>
-        </div>
-
-        <div class="field">
-          <label>Scene Description</label>
-          <textarea id="s1-scene" rows="3" placeholder="Deskripsikan scene-mu secara detail... e.g. misty mountain valley with pine forest, stone path, wooden cabin..."></textarea>
-        </div>
-
-        <div class="row2">
-          <div class="field">
-            <label>Rain Intensity</label>
-            <select id="s1-rain">
-              <option value="heavy pouring rain with visible rain streaks">Heavy Pouring Rain</option>
-              <option value="steady moderate rain">Steady Moderate Rain</option>
-              <option value="gentle misty drizzle">Gentle Misty Drizzle</option>
-              <option value="light scattered rain">Light Scattered Rain</option>
-            </select>
-          </div>
-          <div class="field">
-            <label>Mood / Atmosphere</label>
-            <select id="s1-mood">
-              <option value="cozy intimate warm">Cozy &amp; Intimate</option>
-              <option value="melancholic cinematic moody">Melancholic &amp; Cinematic</option>
-              <option value="serene meditative peaceful">Serene &amp; Meditative</option>
-              <option value="mysterious dark atmospheric">Mysterious &amp; Moody</option>
-              <option value="warm nostalgic golden">Warm &amp; Nostalgic</option>
-            </select>
-          </div>
-        </div>
-
-        <div class="row2">
-          <div class="field">
-            <label>Lighting</label>
-            <select id="s1-light">
-              <option value="warm interior light glow">Warm Interior Glow</option>
-              <option value="cool blue moonlight">Cool Moonlight</option>
-              <option value="neon reflections on wet surfaces">Neon Reflections</option>
-              <option value="soft overcast diffused light">Soft Overcast</option>
-              <option value="golden hour fading light">Golden Hour Fading</option>
-              <option value="candle and lantern light">Candle &amp; Lantern</option>
-            </select>
-          </div>
-          <div class="field">
-            <label>Waktu / Time of Day</label>
-            <div class="toggle-grid" style="grid-template-columns:repeat(4,1fr);margin-top:4px;">
-              <div class="toggle-btn" data-time="rainy morning with soft diffused light" onclick="selectTime(this)">
-                <div class="toggle-check"></div>
-                <div class="toggle-text" style="text-align:center;width:100%;"><strong>🌅 Pagi</strong>Morning</div>
-              </div>
-              <div class="toggle-btn" data-time="overcast rainy midday" onclick="selectTime(this)">
-                <div class="toggle-check"></div>
-                <div class="toggle-text" style="text-align:center;width:100%;"><strong>☁️ Siang</strong>Midday</div>
-              </div>
-              <div class="toggle-btn on" data-time="rainy evening at dusk with golden fading light" onclick="selectTime(this)">
-                <div class="toggle-check">✓</div>
-                <div class="toggle-text" style="text-align:center;width:100%;"><strong>🌇 Sore</strong>Evening</div>
-              </div>
-              <div class="toggle-btn" data-time="rainy night with dark moody atmosphere" onclick="selectTime(this)">
-                <div class="toggle-check"></div>
-                <div class="toggle-text" style="text-align:center;width:100%;"><strong>🌙 Malam</strong>Night</div>
-              </div>
-            </div>
-          </div>
-        </div>
-
-        <div class="field">
-          <label>Additional Detail (optional)</label>
-          <textarea id="s1-extra" rows="4" placeholder="e.g. fallen leaves on ground, steam rising from cup, moss on stones, old wooden bridge, fireflies, lantern hanging from tree..."></textarea>
-        </div>
-
-      </div>
-    </div>
-
-    <div class="btn-row">
-      <button class="btn btn-primary btn-full" id="btn-gen-img" onclick="generateImagePrompt()">
-        <span>⬡ Generate GPT+ Image Prompt</span>
-      </button>
-    </div>
-
-    <div class="loading" id="load-1">
-      <div class="dots"><span></span><span></span><span></span></div>
-      <div id="load-1-txt">Crafting image prompt...</div>
-    </div>
-    <div class="err" id="err-1"></div>
-
-    <div id="output-1" style="display:none;margin-top:16px;" class="fade-in">
-      <div class="card">
-        <div class="card-head">
-          <div class="card-title"><span class="dot blue"></span>GPT+ Image Prompt</div>
-          <button class="btn btn-copy" onclick="copyEl('img-prompt-out', this)">Copy</button>
-        </div>
-        <div class="card-body">
-          <div class="output-area" id="img-prompt-out"></div>
-          <div class="char-counter" id="img-char-count"></div>
-        </div>
-      </div>
-      <div class="btn-row">
-        <button class="btn btn-next" onclick="goStep(2)"><span>→ Next: Video Prompt</span></button>
-        <span style="font-size:11px;color:var(--text-dim)">Generate image in GPT+, then continue</span>
-      </div>
-    </div>
-
-  </div>
-
-  <!-- ========== STEP 2: SeeDance Video Prompt ========== -->
-  <div class="step-panel" id="panel-2">
-
-    <div class="card">
-      <div class="card-head">
-        <div class="card-title"><span class="dot teal"></span>Reference Image Upload</div>
-      </div>
-      <div class="card-body">
-        <div class="upload-zone" id="upload-zone">
-          <input type="file" id="img-upload" accept="image/*" onchange="handleUpload(this)" />
-          <div id="upload-placeholder">
-            <div class="upload-icon">🖼</div>
-            <div class="upload-hint">Drop your GPT+ image here or <strong>click to browse</strong></div>
-            <div style="font-size:11px;color:var(--text-dim);margin-top:6px;">JPG, PNG, WEBP</div>
-          </div>
-          <img id="preview-img" class="preview-img" style="display:none;" />
+        <div class="output-box">
+          <div class="output-text" id="videoPromptOutput">—</div>
+          <button class="copy-btn" onclick="copyOutput('videoPromptOutput',this)">COPY</button>
         </div>
       </div>
     </div>
 
     <div class="card">
-      <div class="card-head">
-        <div class="card-title"><span class="dot teal"></span>Effect Toggles</div>
-      </div>
+      <div class="card-header"><div class="card-dot gold"></div><span class="card-title">YouTube Title</span></div>
       <div class="card-body">
-
-        <div class="locked-row">
-          <div class="locked-badge">Super Static Camera</div>
-          <div class="locked-badge">No Human Voice</div>
-          <div class="locked-badge">No Song / No Music</div>
-        </div>
-
-        <div class="toggle-section">
-          <div class="toggle-label">Visual Effects</div>
-          <div class="toggle-grid">
-            <div class="toggle-btn on" data-key="heavy_rain" onclick="toggleFx(this)">
-              <div class="toggle-check">✓</div>
-              <div class="toggle-text"><strong>Heavy Rain</strong>Very heavy downpour, rain streaks clearly visible</div>
-            </div>
-            <div class="toggle-btn on" data-key="wind" onclick="toggleFx(this)">
-              <div class="toggle-check">✓</div>
-              <div class="toggle-text"><strong>Strong Wind 50kph</strong>Trees, leaves, branches sway intensely</div>
-            </div>
-            <div class="toggle-btn on" data-key="clouds" onclick="toggleFx(this)">
-              <div class="toggle-check">✓</div>
-              <div class="toggle-text"><strong>Clouds Moving Left</strong>Dark storm clouds drifting left</div>
-            </div>
-            <div class="toggle-btn" data-key="boat" onclick="toggleFx(this)">
-              <div class="toggle-check"></div>
-              <div class="toggle-text"><strong>Floating Object</strong>Boat / object naturally rocking on water</div>
-            </div>
-            <div class="toggle-btn" data-key="puddle" onclick="toggleFx(this)">
-              <div class="toggle-check"></div>
-              <div class="toggle-text"><strong>Puddle Ripples</strong>Rain hitting puddles creating ripple rings</div>
-            </div>
-            <div class="toggle-btn" data-key="mist" onclick="toggleFx(this)">
-              <div class="toggle-check"></div>
-              <div class="toggle-text"><strong>Rising Mist / Fog</strong>Low mist drifting across ground or water</div>
-            </div>
-            <div class="toggle-btn" data-key="smoke" onclick="toggleFx(this)">
-              <div class="toggle-check"></div>
-              <div class="toggle-text"><strong>Chimney Smoke</strong>Smoke gently rising from chimney</div>
-            </div>
-            <div class="toggle-btn" data-key="wet" onclick="toggleFx(this)">
-              <div class="toggle-check"></div>
-              <div class="toggle-text"><strong>Wet Surfaces</strong>Reflective puddles on road / stone / wood</div>
-            </div>
-          </div>
-        </div>
-
-        <div class="toggle-section">
-          <div class="toggle-label">Sound Atmosphere (included in prompt)</div>
-          <div class="toggle-grid">
-            <div class="toggle-btn on" data-key="rain_sound" onclick="toggleFx(this)">
-              <div class="toggle-check">✓</div>
-              <div class="toggle-text"><strong>Cozy Rain Sound</strong>Heavy comfortable rain ambience</div>
-            </div>
-            <div class="toggle-btn on" data-key="waves" onclick="toggleFx(this)">
-              <div class="toggle-check">✓</div>
-              <div class="toggle-text"><strong>Distant Ocean Waves</strong>Faint wave sounds in background</div>
-            </div>
-            <div class="toggle-btn" data-key="river" onclick="toggleFx(this)">
-              <div class="toggle-check"></div>
-              <div class="toggle-text"><strong>River / Stream</strong>Sound of flowing water nearby</div>
-            </div>
-            <div class="toggle-btn" data-key="leaves" onclick="toggleFx(this)">
-              <div class="toggle-check"></div>
-              <div class="toggle-text"><strong>Leaves Rustling</strong>Wind through foliage sound</div>
-            </div>
-            <div class="toggle-btn" data-key="waterfall" onclick="toggleFx(this)">
-              <div class="toggle-check"></div>
-              <div class="toggle-text"><strong>Waterfall Sound</strong>Continuous roaring waterfall nearby</div>
-            </div>
-            <div class="toggle-btn on" data-key="no_thunder" onclick="toggleFx(this)">
-              <div class="toggle-check">✓</div>
-              <div class="toggle-text"><strong>🚫 No Thunder</strong>Strictly no thunder sound at all</div>
-            </div>
-          </div>
-        </div>
-
-        <div class="field">
-          <label>Manual Addition (custom scene elements)</label>
-          <textarea id="s2-manual" rows="2" placeholder="e.g. perahu kayu berlabuh di tepi danau, smoke from incense stick, lantern swaying..."></textarea>
-        </div>
-
-      </div>
-    </div>
-
-    <div class="btn-row">
-      <button class="btn btn-primary btn-full" id="btn-gen-vid" onclick="generateVideoPrompt()">
-        <span>⬡ Generate SeeDance 2.0 Prompt</span>
-      </button>
-    </div>
-
-    <div class="loading" id="load-2">
-      <div class="dots"><span></span><span></span><span></span></div>
-      <div id="load-2-txt">Analyzing image and building video prompt...</div>
-    </div>
-    <div class="err" id="err-2"></div>
-
-    <div id="output-2" style="display:none;margin-top:16px;" class="fade-in">
-      <div class="card">
-        <div class="card-head">
-          <div class="card-title"><span class="dot teal"></span>SeeDance 2.0 Prompt</div>
-          <button class="btn btn-copy" onclick="copyEl('vid-prompt-out', this)">Copy</button>
-        </div>
-        <div class="card-body">
-          <div class="output-area" id="vid-prompt-out"></div>
+        <div class="output-box">
+          <div class="output-text title-text" id="ytTitleOutput">—</div>
+          <button class="copy-btn" onclick="copyOutput('ytTitleOutput',this)">COPY</button>
         </div>
       </div>
-      <div class="btn-row">
-        <button class="btn btn-next" onclick="goStep(3)"><span>→ Next: YouTube Package</span></button>
-      </div>
     </div>
-
-  </div>
-
-  <!-- ========== STEP 3: YouTube Package ========== -->
-  <div class="step-panel" id="panel-3">
 
     <div class="card">
-      <div class="card-head">
-        <div class="card-title"><span class="dot gold"></span>Upload Thumbnail / Video Frame</div>
-      </div>
+      <div class="card-header"><div class="card-dot gold"></div><span class="card-title">Hook Text — First 3 Seconds</span></div>
       <div class="card-body">
-        <div class="upload-zone" id="upload-zone-yt">
-          <input type="file" id="img-upload-yt" accept="image/*" onchange="handleUploadYT(this)" />
-          <div id="upload-placeholder-yt">
-            <div class="upload-icon">🎬</div>
-            <div class="upload-hint">Upload gambar / thumbnail video-mu<br><strong>AI akan analisis dan generate semua metadata YouTube</strong></div>
-            <div style="font-size:11px;color:var(--text-dim);margin-top:6px;">JPG, PNG, WEBP</div>
-          </div>
-          <img id="preview-img-yt" class="preview-img" style="display:none;" />
-        </div>
-        <div class="row2" style="margin-top:14px;">
-          <div class="field">
-            <label>Primary Audience Intent</label>
-            <select id="s3-intent">
-              <option value="sleep and relaxation">Sleep & Relaxation</option>
-              <option value="study and focus">Study & Focus</option>
-              <option value="meditation and mindfulness">Meditation</option>
-              <option value="work from home ambience">Work From Home</option>
-              <option value="anxiety relief and stress">Anxiety Relief</option>
-            </select>
-          </div>
-          <div class="field">
-            <label>Video Duration</label>
-            <select id="s3-duration">
-              <option value="1 hour">1 Hour</option>
-              <option value="2 hours">2 Hours</option>
-              <option value="3 hours">3 Hours</option>
-              <option value="8 hours (overnight)">8 Hours (Overnight)</option>
-            </select>
-          </div>
+        <div class="output-box">
+          <div class="output-text hook-text" id="hookOutput">—</div>
+          <button class="copy-btn" onclick="copyOutput('hookOutput',this)">COPY</button>
         </div>
       </div>
     </div>
 
-    <div class="btn-row">
-      <button class="btn btn-primary btn-full" id="btn-gen-yt" onclick="generateYouTube()">
-        <span>⬡ Generate YouTube Package</span>
-      </button>
-    </div>
-
-    <div class="loading" id="load-3">
-      <div class="dots"><span></span><span></span><span></span></div>
-      <div id="load-3-txt">Writing YouTube metadata...</div>
-    </div>
-    <div class="err" id="err-3"></div>
-
-    <div id="output-3" style="display:none;margin-top:16px;" class="fade-in">
-
-      <div class="card">
-        <div class="card-head">
-          <div class="card-title"><span class="dot gold"></span>YouTube Title</div>
-          <button class="btn btn-copy" onclick="copyEl('yt-title-out', this)">Copy</button>
+    <div class="card">
+      <div class="card-header"><div class="card-dot gold"></div><span class="card-title">YouTube Description</span></div>
+      <div class="card-body">
+        <div class="output-box">
+          <div class="output-text" id="ytDescOutput">—</div>
+          <button class="copy-btn" onclick="copyOutput('ytDescOutput',this)">COPY</button>
         </div>
-        <div class="card-body">
-          <div class="output-area" id="yt-title-out" style="font-family:'Cormorant Garamond',serif;font-size:18px;font-weight:400;"></div>
-        </div>
-      </div>
-
-      <div class="card">
-        <div class="card-head">
-          <div class="card-title"><span class="dot gold"></span>Hook Text — First 3 Seconds</div>
-          <button class="btn btn-copy" onclick="copyEl('yt-hook-out', this)">Copy</button>
-        </div>
-        <div class="card-body">
-          <div class="hook-big" id="yt-hook-out"></div>
-        </div>
-      </div>
-
-      <div class="card">
-        <div class="card-head">
-          <div class="card-title"><span class="dot gold"></span>YouTube Description</div>
-          <button class="btn btn-copy" onclick="copyEl('yt-desc-out', this)">Copy</button>
-        </div>
-        <div class="card-body">
-          <div class="output-area" id="yt-desc-out"></div>
-        </div>
-      </div>
-
-      <div class="card">
-        <div class="card-head">
-          <div class="card-title"><span class="dot green"></span>Tags (20 keywords)</div>
-          <button class="btn btn-copy" id="copy-tags-btn" onclick="copyTags(this)">Copy All</button>
-        </div>
-        <div class="card-body">
-          <div class="tags-area" id="yt-tags-out"></div>
-        </div>
-      </div>
-
-      <div class="card">
-        <div class="card-head">
-          <div class="card-title"><span class="dot purple"></span>Category / End Screen / Cards Notes</div>
-        </div>
-        <div class="card-body">
-          <div class="output-area" id="yt-extra-out"></div>
-        </div>
-      </div>
-
-      <div class="btn-row">
-        <button class="btn btn-next" onclick="goStep(4)"><span>→ View All Output</span></button>
       </div>
     </div>
 
+    <div class="card">
+      <div class="card-header"><div class="card-dot gold"></div><span class="card-title">Tags (20 keywords)</span></div>
+      <div class="card-body">
+        <div class="tags-box" id="tagsBox"></div>
+        <button class="copy-btn" style="position:static;margin-top:8px" onclick="copyTags()">COPY ALL TAGS</button>
+      </div>
+    </div>
+
+    <div class="card">
+      <div class="card-header"><div class="card-dot"></div><span class="card-title">🎨 Thumbnail Prompt</span><span class="badge new" style="margin-left:8px">Dopamine Design</span></div>
+      <div class="card-body">
+        <div class="thumb-prompt">
+          <div class="thumb-prompt-text" id="thumbPromptOutput">—</div>
+        </div>
+        <button class="copy-btn" style="position:static;margin-top:10px" onclick="copyText('thumbPromptOutput')">COPY THUMBNAIL PROMPT</button>
+      </div>
+    </div>
+
+    <div class="card">
+      <div class="card-header"><div class="card-dot"></div><span class="card-title">Category / End Screen / Cards Notes</span></div>
+      <div class="card-body">
+        <div class="output-box">
+          <div class="output-text" id="categoryOutput">—</div>
+          <button class="copy-btn" onclick="copyOutput('categoryOutput',this)">COPY</button>
+        </div>
+      </div>
+    </div>
+
+    <button class="next-btn primary" onclick="switchTab(2)" style="margin-top:4px">→ View All Output</button>
   </div>
+</div>
 
-  <!-- ========== STEP 4: All Output ========== -->
-  <div class="step-panel" id="panel-4">
-    <div id="all-output-wrap">
-      <div style="text-align:center;padding:48px 0;color:var(--text-dim);">
-        Complete Steps 1–3 first to see all outputs here.
-      </div>
+<!-- ===================== TAB 3: ALL OUTPUT ===================== -->
+<div class="main panel" id="panel-2">
+  <div id="allOutputContainer">
+    <div style="text-align:center;padding:60px 20px;color:var(--text3)">
+      <div style="font-size:24px;margin-bottom:12px">⬡</div>
+      <div style="font-size:13px;letter-spacing:0.1em">Complete Steps 1–2 first to see all outputs here.</div>
     </div>
   </div>
-
-</div><!-- /wrap -->
+</div>
 
 <script>
-// ---- Rain canvas ----
-const canvas = document.getElementById('rain-bg');
-const ctx = canvas.getContext('2d');
-let drops = [];
-function resizeCanvas() {
-  canvas.width = window.innerWidth;
-  canvas.height = window.innerHeight;
-  drops = Array.from({length:100}, () => ({
-    x: Math.random()*canvas.width, y: Math.random()*canvas.height,
-    s: 1.5+Math.random()*2.8, l: 10+Math.random()*14,
-    o: 0.15+Math.random()*0.35
-  }));
-}
-function drawRain() {
-  ctx.clearRect(0,0,canvas.width,canvas.height);
-  drops.forEach(d => {
-    ctx.beginPath();
-    ctx.moveTo(d.x,d.y);
-    ctx.lineTo(d.x-0.8,d.y+d.l);
-    ctx.strokeStyle=`rgba(79,195,247,${d.o})`;
-    ctx.lineWidth=0.6; ctx.stroke();
-    d.y+=d.s;
-    if(d.y>canvas.height){d.y=-d.l;d.x=Math.random()*canvas.width;}
-  });
-  requestAnimationFrame(drawRain);
-}
-resizeCanvas(); window.addEventListener('resize',resizeCanvas); drawRain();
+// ── STATE ──────────────────────────────────────────
+let uploadedImageB64 = null;
+let uploadedImageType = 'image/jpeg';
+let allOutputs = {};
 
-// ---- State ----
-let state = {
-  imgPrompt: '',
-  vidPrompt: '',
-  ytTitle: '',
-  ytHook: '',
-  ytDesc: '',
-  ytTags: [],
-  ytExtra: '',
-  uploadedImageB64: null,
-  uploadedImageType: null,
-  ytImageB64: null,
-  ytImageType: null,
-  thumbPrompt: ''
-};
-
-// ---- Step nav ----
-function goStep(n) {
-  [1,2,3,4].forEach(i => {
-    document.getElementById('panel-'+i).classList.toggle('active', i===n);
-    document.getElementById('tab-'+i).classList.toggle('active', i===n);
-  });
-  window.scrollTo({top:0,behavior:'smooth'});
-}
-
-// ---- Location multi-select ----
-function toggleLoc(el) {
-  el.classList.toggle('on');
-  el.querySelector('.toggle-check').textContent = el.classList.contains('on') ? '✓' : '';
-}
-
-// ---- Time single-select ----
-function selectTime(el) {
-  document.querySelectorAll('[data-time]').forEach(b => {
-    b.classList.remove('on');
-    b.querySelector('.toggle-check').textContent = '';
-  });
-  el.classList.add('on');
-  el.querySelector('.toggle-check').textContent = '✓';
-}
-
-function getSelectedLoc() {
-  const els = document.querySelectorAll('[data-loc].on');
-  if (!els.length) return '';
-  return Array.from(els).map(e => e.dataset.loc).join(' + ');
-}
-function getSelectedTime() {
-  const el = document.querySelector('[data-time].on');
-  return el ? el.dataset.time : 'rainy evening at dusk';
-}
-
-// ---- Toggle effects (Step 2) ----
-function toggleFx(el) {
-  el.classList.toggle('on');
-  const chk = el.querySelector('.toggle-check');
-  chk.textContent = el.classList.contains('on') ? '✓' : '';
-}
-
-function getActiveFx() {
-  const map = {
-    heavy_rain: 'extremely heavy pouring rain, rain streaks must be clearly visible in every frame',
-    wind: 'strong 50kph wind: trees swaying intensely, leaves flying, branches bending significantly',
-    clouds: 'dark storm clouds moving toward the left side of the frame',
-    boat: 'any boat or floating object naturally bobbing up and down on water waves',
-    puddle: 'rain hitting puddles and wet surfaces creating visible circular ripple rings',
-    mist: 'low-lying mist or fog slowly drifting across the ground or water surface',
-    smoke: 'chimney smoke or steam gently rising and drifting with the wind',
-    wet: 'all surfaces appear wet and reflective — stones, roads, wood planks glistening',
-    rain_sound: 'audio: heavy cozy rain falling sound, very comfortable and immersive',
-    waves: 'audio: faint distant ocean waves or lapping water in background',
-    river: 'audio: sound of nearby flowing stream or river',
-    leaves: 'audio: wind rustling through tree leaves and foliage',
-    waterfall: 'audio: loud continuous waterfall roaring sound, rushing water falling from height',
-    no_thunder: 'STRICTLY NO THUNDER SOUND — absolutely zero thunder, not even distant rumble, remove all thunder completely'
-  };
-  return Array.from(document.querySelectorAll('[data-key].on'))
-    .map(b => map[b.dataset.key]).filter(Boolean);
-}
-
-// ---- Upload image ----
-function handleUpload(input) {
-  const file = input.files[0];
-  if (!file) return;
-  const reader = new FileReader();
-  reader.onload = e => {
-    const src = e.target.result;
-    document.getElementById('preview-img').src = src;
-    document.getElementById('preview-img').style.display = 'block';
-    document.getElementById('upload-placeholder').style.display = 'none';
-    // Extract base64
-    const parts = src.split(',');
-    state.uploadedImageB64 = parts[1];
-    // Detect actual type from data URL header
-    const header = parts[0];
-    if (header.includes('jpeg') || header.includes('jpg')) {
-      state.uploadedImageType = 'image/jpeg';
-    } else if (header.includes('png')) {
-      state.uploadedImageType = 'image/png';
-    } else if (header.includes('webp')) {
-      state.uploadedImageType = 'image/webp';
-    } else {
-      state.uploadedImageType = file.type || 'image/jpeg';
-    }
-  };
-  reader.readAsDataURL(file);
-}
-
-// ---- Upload YouTube image ----
-function handleUploadYT(input) {
-  const file = input.files[0];
-  if (!file) return;
-  const reader = new FileReader();
-  reader.onload = e => {
-    const src = e.target.result;
-    document.getElementById('preview-img-yt').src = src;
-    document.getElementById('preview-img-yt').style.display = 'block';
-    document.getElementById('upload-placeholder-yt').style.display = 'none';
-    const parts = src.split(',');
-    state.ytImageB64 = parts[1];
-    const headerYT = parts[0];
-    if (headerYT.includes('jpeg') || headerYT.includes('jpg')) {
-      state.ytImageType = 'image/jpeg';
-    } else if (headerYT.includes('png')) {
-      state.ytImageType = 'image/png';
-    } else if (headerYT.includes('webp')) {
-      state.ytImageType = 'image/webp';
-    } else {
-      state.ytImageType = file.type || 'image/jpeg';
-    }
-  };
-  reader.readAsDataURL(file);
-}
-
-// Drag events YT
-const zoneYT = document.getElementById('upload-zone-yt');
-zoneYT.addEventListener('dragover', e => { e.preventDefault(); zoneYT.classList.add('drag'); });
-zoneYT.addEventListener('dragleave', () => zoneYT.classList.remove('drag'));
-zoneYT.addEventListener('drop', e => {
-  e.preventDefault(); zoneYT.classList.remove('drag');
-  const file = e.dataTransfer.files[0];
-  if (file && file.type.startsWith('image/')) {
-    const dt = new DataTransfer();
-    dt.items.add(file);
-    document.getElementById('img-upload-yt').files = dt.files;
-    handleUploadYT(document.getElementById('img-upload-yt'));
-  }
-});
-
-// Drag events
-const zone = document.getElementById('upload-zone');
-zone.addEventListener('dragover', e => { e.preventDefault(); zone.classList.add('drag'); });
-zone.addEventListener('dragleave', () => zone.classList.remove('drag'));
-zone.addEventListener('drop', e => {
-  e.preventDefault(); zone.classList.remove('drag');
-  const file = e.dataTransfer.files[0];
-  if (file && file.type.startsWith('image/')) {
-    const dt = new DataTransfer();
-    dt.items.add(file);
-    document.getElementById('img-upload').files = dt.files;
-    handleUpload(document.getElementById('img-upload'));
-  }
-});
-
-// ---- Char counter ----
-function setCharCount(elId, countId, max) {
-  const text = document.getElementById(elId).textContent;
-  const len = text.length;
-  const el = document.getElementById(countId);
-  el.textContent = `${len} / ${max} characters`;
-  el.className = 'char-counter ' + (len > max ? 'over' : len > max*0.85 ? 'warn' : 'ok');
-}
-
-// ---- Copy ----
-function copyText(text, btn, resetLabel) {
-  const done = () => {
-    btn.textContent = 'Copied ✓'; btn.classList.add('copied');
-    setTimeout(() => { btn.textContent = resetLabel || 'Copy'; btn.classList.remove('copied'); }, 2000);
-  };
-  if (navigator.clipboard && navigator.clipboard.writeText) {
-    navigator.clipboard.writeText(text).then(done).catch(() => fallbackCopy(text, btn, done));
+// ── API KEY ────────────────────────────────────────
+document.getElementById('apiKeyInput').addEventListener('input', function(){
+  const v = this.value.trim();
+  const s = document.getElementById('apiStatus');
+  if(v.startsWith('sk-ant-') && v.length > 20){
+    s.textContent = '✓ Key recognized'; s.className = 'api-status ok';
+  } else if(v.length > 5){
+    s.textContent = 'Key format unrecognized'; s.className = 'api-status';
   } else {
-    fallbackCopy(text, btn, done);
+    s.textContent = 'Enter key to enable AI generation'; s.className = 'api-status';
   }
-}
-function fallbackCopy(text, btn, done) {
-  const ta = document.createElement('textarea');
-  ta.value = text;
-  ta.style.cssText = 'position:fixed;top:-9999px;left:-9999px;opacity:0;';
-  document.body.appendChild(ta);
-  ta.focus(); ta.select();
-  try { document.execCommand('copy'); done(); } catch(e) { btn.textContent = 'Select manually'; }
-  document.body.removeChild(ta);
-}
-function copyEl(id, btn) {
-  const text = document.getElementById(id).textContent.trim();
-  copyText(text, btn, 'Copy');
-}
-function copyTags(btn) {
-  const text = state.ytTags.join(', ');
-  copyText(text, btn, 'Copy All');
+});
+
+function getApiKey(){ return document.getElementById('apiKeyInput').value.trim(); }
+
+// ── TABS ───────────────────────────────────────────
+function switchTab(idx){
+  document.querySelectorAll('.panel').forEach((p,i)=> p.classList.toggle('active', i===idx));
+  document.querySelectorAll('.tab').forEach((t,i)=> t.classList.toggle('active', i===idx));
 }
 
-// ---- Loading messages ----
-const lmsg = [
-  ['Crafting scene details...','Building hyperrealistic composition...','Optimizing lighting parameters...','Finalizing image prompt...'],
-  ['Analyzing your reference image...','Mapping motion elements...','Building SeeDance parameters...','Optimizing for seamless loop...'],
-  ['Writing YouTube title...','Building SEO description...','Generating keyword tags...','Finalizing metadata package...']
-];
-let lIntervals = {};
-function startLoad(n) {
-  let i=0;
-  const msgs = lmsg[n-1];
-  const el = document.getElementById('load-'+n+'-txt');
-  el.textContent = msgs[0];
-  lIntervals[n] = setInterval(() => { i=(i+1)%msgs.length; el.textContent=msgs[i]; }, 1800);
-  document.getElementById('load-'+n).classList.add('on');
+// ── CHIP HELPERS ───────────────────────────────────
+function toggleChip(el){
+  el.classList.toggle('active');
 }
-function stopLoad(n) {
-  clearInterval(lIntervals[n]);
-  document.getElementById('load-'+n).classList.remove('on');
+function toggleSingleChip(el, groupId){
+  document.getElementById(groupId).querySelectorAll('.chip').forEach(c=>c.classList.remove('active'));
+  el.classList.add('active');
 }
-function showErr(n, msg) {
-  const el = document.getElementById('err-'+n);
-  el.textContent = msg; el.classList.add('on');
+function setRadio(el, groupId){
+  document.getElementById(groupId).querySelectorAll('.radio-pill').forEach(r=>r.classList.remove('active'));
+  el.classList.add('active');
 }
-function hideErr(n) { document.getElementById('err-'+n).classList.remove('on'); }
+function toggleEffect(el){
+  el.classList.toggle('active');
+  const cb = el.querySelector('.effect-cb');
+  cb.textContent = el.classList.contains('active') ? '✓' : '';
+}
 
-// ---- API call ----
-async function callClaude(system, user, imageB64, imageType) {
-  const msgContent = [];
-  if (imageB64) {
-    msgContent.push({ type:'image', source:{ type:'base64', media_type: imageType, data: imageB64 }});
+// ── UPLOAD ─────────────────────────────────────────
+function handleDragOver(e){ e.preventDefault(); e.currentTarget.classList.add('drag'); }
+function handleDragLeave(e){ e.currentTarget.classList.remove('drag'); }
+function handleDrop(e, id){
+  e.preventDefault(); e.currentTarget.classList.remove('drag');
+  const file = e.dataTransfer.files[0];
+  if(file) processImageFile(file, id);
+}
+function handleFileSelect(e, id){
+  const file = e.target.files[0];
+  if(file) processImageFile(file, id);
+}
+function processImageFile(file, id){
+  uploadedImageType = file.type || 'image/jpeg';
+  const reader = new FileReader();
+  reader.onload = function(ev){
+    const b64full = ev.target.result;
+    uploadedImageB64 = b64full.split(',')[1];
+    const img = document.getElementById('previewImg' + id.replace('img',''));
+    const placeholder = document.getElementById('uploadPlaceholder' + id.replace('img',''));
+    if(img){ img.src = b64full; img.style.display='block'; }
+    if(placeholder) placeholder.style.display='none';
+  };
+  reader.readAsDataURL(file);
+}
+
+// ── COLLECT SCENE DATA ─────────────────────────────
+function getSceneData(){
+  const locs = [...document.querySelectorAll('#locationChips .chip.active')].map(c=>c.dataset.val).join(', ');
+  const rain = document.querySelector('#rainIntensity .radio-pill.active')?.dataset.val || '';
+  const mood = document.querySelector('#moodGroup .radio-pill.active')?.dataset.val || '';
+  const light = document.querySelector('#lightGroup .radio-pill.active')?.dataset.val || '';
+  const time = document.querySelector('#timeChips .chip.active')?.dataset.val || '';
+  const desc = document.getElementById('sceneDesc').value.trim();
+  const extra = document.getElementById('additionalDetail').value.trim();
+  return { locs, rain, mood, light, time, desc, extra };
+}
+function getEffects(){
+  const vis = [...document.querySelectorAll('#visualEffects .effect-item.active')].map(e=>e.dataset.val);
+  const snd = [...document.querySelectorAll('#soundEffects .effect-item.active')].map(e=>e.dataset.val);
+  const manual = document.getElementById('manualAddition').value.trim();
+  return { vis, snd, manual };
+}
+
+// ── CLAUDE API ─────────────────────────────────────
+async function callClaude(messages, maxTokens=1200){
+  const key = getApiKey();
+  if(!key) throw new Error('No API key');
+  const body = { model:'claude-sonnet-4-20250514', max_tokens: maxTokens, messages };
+  if(uploadedImageB64 && messages.some(m=> Array.isArray(m.content))){
+    // already has image blocks
   }
-  msgContent.push({ type:'text', text: user });
-
-  const resp = await fetch('https://api.anthropic.com/v1/messages', {
+  const res = await fetch('https://api.anthropic.com/v1/messages',{
     method:'POST',
-    headers:{'Content-Type':'application/json','x-api-key': getApiKey(), 'anthropic-version':'2023-06-01', 'anthropic-dangerous-direct-browser-access': 'true'},
-    body: JSON.stringify({
-      model:'claude-sonnet-4-6',
-      max_tokens:1000,
-      system: system,
-      messages:[{ role:'user', content: msgContent }]
-    })
+    headers:{'Content-Type':'application/json'},
+    body: JSON.stringify(body)
   });
-  const data = await resp.json();
-  if (data.error) throw new Error(data.error.message);
-  const raw = data.content.map(i=>i.text||'').join('');
-  const clean = raw.replace(/```json|```/g,'').trim();
-  return JSON.parse(clean);
+  const data = await res.json();
+  if(!data.content || !data.content[0]) throw new Error(data.error?.message || 'API error');
+  return data.content.map(b=>b.text||'').join('');
 }
 
-// ---- STEP 1: Generate Image Prompt ----
-async function generateImagePrompt() {
-  const scene = document.getElementById('s1-scene').value.trim();
-  if(!scene){ showErr(1,'Please enter a scene description.'); return; }
-  hideErr(1);
-  const btn = document.getElementById('btn-gen-img');
-  btn.disabled=true; startLoad(1);
-  document.getElementById('output-1').style.display='none';
-
-  const system = `You are a professional prompt engineer specializing in hyperrealistic AI image generation for ASMR rain ambience videos.
-
-STRICT RULES for GPT+ (DALL-E 3) prompts:
-- Photorealistic photography style ONLY — never painterly, never illustration, never anime
-- Static composition — no implied camera movement
-- NO people, NO animals, NO characters of any kind
-- Rain and weather must be the dominant atmospheric element
-- Include specific photographic terms: f-stop, focal length, lens type
-- Maximum 1070 characters
-- Single paragraph, no line breaks
-
-Respond ONLY with valid JSON: {"prompt": "..."}`;
-
-  const loc = getSelectedLoc();
-  const time = getSelectedTime();
-  const rain = document.getElementById('s1-rain').value;
-  const mood = document.getElementById('s1-mood').value;
-  const light = document.getElementById('s1-light').value;
-  const extra = document.getElementById('s1-extra').value;
-
-  const user = `Create a GPT+ hyperrealistic image prompt for:
-Location type: ${loc || 'natural landscape'}
-Time of day: ${time}
-Rain: ${rain}
-Mood: ${mood}
-Lighting: ${light}
-Scene detail: ${scene}
-${extra ? 'Extra details: '+extra : ''}
-
-Requirements: photorealistic photography, static composition, no people/animals, visible rain, under 1070 characters.`;
-
-  try {
-    const r = await callClaude(system, user, null, null);
-    state.imgPrompt = r.prompt;
-    document.getElementById('img-prompt-out').textContent = r.prompt;
-    setCharCount('img-prompt-out','img-char-count',1070);
-    document.getElementById('output-1').style.display='block';
-    // Pre-fill step 3
-  } catch(e) {
-    showErr(1,'Generation failed: '+e.message);
-  } finally {
-    stopLoad(1); btn.disabled=false;
-  }
-}
-
-// ---- STEP 2: Generate Video Prompt ----
-async function generateVideoPrompt() {
-  hideErr(2);
-  const btn = document.getElementById('btn-gen-vid');
-  btn.disabled=true; startLoad(2);
-  document.getElementById('output-2').style.display='none';
-
-  const activeFx = getActiveFx();
-  const manual = document.getElementById('s2-manual').value.trim();
-
-  const system = `You are a professional prompt engineer for SeeDance 2.0 AI video generation.
-
-SeeDance 2.0 is an image-to-video AI. Your prompt instructs how the static image should be animated.
-
-LOCKED (always include, never remove):
-- super static camera — absolutely no camera movement, no pan, no zoom, no tilt
-- no human voice, no singing, no music
-- seamless loop animation
-
-STYLE: The output should feel cinematic, calm, and ASMR-appropriate. Be as detailed and descriptive as needed — no character limit.
-
-Respond ONLY with valid JSON: {"prompt": "..."}`;
-
-  const fxText = activeFx.length > 0 ? activeFx.join('; ') : 'gentle natural rain animation';
-  const user = `Create a SeeDance 2.0 image-to-video prompt.
-${state.uploadedImageB64 ? 'I have provided the reference image above.' : 'No image provided — create a general cinematic rain animation prompt.'}
-
-Required effects to animate: ${fxText}
-${manual ? 'Additional custom elements: '+manual : ''}
-
-Rules: super static camera locked, no thunder, no voice, seamless loop, max 1070 characters.`;
-
-  try {
-    const r = await callClaude(system, user, state.uploadedImageB64, state.uploadedImageType);
-    state.vidPrompt = r.prompt;
-    document.getElementById('vid-prompt-out').textContent = r.prompt;
-    setCharCount('vid-prompt-out','vid-char-count',1070);
-    document.getElementById('output-2').style.display='block';
-  } catch(e) {
-    showErr(2,'Generation failed: '+e.message);
-  } finally {
-    stopLoad(2); btn.disabled=false;
-  }
-}
-
-// ---- STEP 3: Generate YouTube Package ----
-async function generateYouTube() {
-  hideErr(3);
-  const btn = document.getElementById('btn-gen-yt');
-  btn.disabled=true; startLoad(3);
-  document.getElementById('output-3').style.display='none';
-
-  const intent = document.getElementById('s3-intent').value;
-  const duration = document.getElementById('s3-duration').value;
-
-  const system = `You are a top YouTube SEO strategist specializing in ASMR and ambient channels. The channel is "ASMR Rain Cinematic" — cinematic rain ambience videos, no music, global English audience.
-
-YOUR GOAL: Generate metadata that is HIGHLY CLICKABLE and ranks well on YouTube search. Every word must be intentional for maximum CTR and discoverability.
-
-TITLE RULES:
-- Template: [Vivid Scene] Rainy [Time] ASMR • No Music • Just Rain
-- Use emotionally evocative, specific scene descriptions (not generic)
-- Include high-search keywords naturally
-- Max 70 characters
-
-HOOK TEXT: 3-5 words, poetic, creates curiosity or calm (e.g. "Rain Over Bali...", "Quiet Forest Rain...", "Tokyo Under Rain...")
-
-DESCRIPTION RULES:
-- First 2 lines MUST be keyword-rich and compelling (shown before "Show more")
-- Include timestamps (00:00, 10:00, 30:00, 1:00:00)
-- Mention: sleep, study, focus, relax, ASMR, rain sounds, no music
-- Natural language, no keyword stuffing
-- 180-220 words
-- End with 3-4 relevant hashtags
-
-TAGS: exactly 25 tags — mix of: high-volume ASMR terms, specific scene keywords, sleep/study/focus terms, rain sound variations, long-tail phrases
-
-extra_notes: YouTube category, thumbnail composition tip, best upload time for this content type.
-
-Respond ONLY with valid JSON — no markdown, no preamble:
-{
-  "title": "...",
-  "hook": "...",
-  "description": "...",
-  "tags": ["tag1",...25 tags],
-  "extra_notes": "..."
-}`;
-
-  const sceneContext = document.getElementById('s1-scene') ? document.getElementById('s1-scene').value.trim() : '';
-  const locContext = getSelectedLoc ? getSelectedLoc() : '';
-  const timeContext = getSelectedTime ? getSelectedTime() : '';
-  const imgPromptContext = state.imgPrompt || '';
-
-  const user = `Generate highly clickable SEO-optimized YouTube metadata for an ASMR rain video.
-
-Context from production:
-${locContext ? 'Location type: '+locContext : ''}
-${timeContext ? 'Time of day: '+timeContext : ''}
-${sceneContext ? 'Scene: '+sceneContext : ''}
-${imgPromptContext ? 'Image prompt used: '+imgPromptContext.substring(0,200) : ''}
-${state.uploadedImageB64 ? '(Reference image has been uploaded for this scene)' : ''}
-
-Audience intent: ${intent}
-Video duration: ${duration}
-Channel: ASMR Rain Cinematic
-
-Generate the most clickable, SEO-optimized YouTube metadata package possible.`;
-
-  try {
-    const r = await callClaude(system, user, null, null);
-    state.ytTitle = r.title;
-    state.ytHook = r.hook;
-    state.ytDesc = r.description;
-    state.ytTags = r.tags;
-    state.ytExtra = r.extra_notes;
-
-    document.getElementById('yt-title-out').textContent = r.title;
-    document.getElementById('yt-hook-out').textContent = r.hook;
-    document.getElementById('yt-desc-out').textContent = r.description;
-    document.getElementById('yt-extra-out').textContent = r.extra_notes;
-
-    const tagsEl = document.getElementById('yt-tags-out');
-    tagsEl.innerHTML = '';
-    r.tags.forEach(t => {
-      const chip = document.createElement('span');
-      chip.className='tag-chip'; chip.textContent=t;
-      tagsEl.appendChild(chip);
-    });
-
-    document.getElementById('output-3').style.display='block';
-    await buildAllOutput();
-    // mark tabs done
-    document.getElementById('tab-1').classList.add('done');
-    document.getElementById('tab-2').classList.add('done');
-    document.getElementById('tab-3').classList.add('done');
-  } catch(e) {
-    showErr(3,'Generation failed: '+e.message);
-  } finally {
-    stopLoad(3); btn.disabled=false;
-  }
-}
-
-// ---- STEP 4: Build all output summary ----
-async function buildAllOutput() {
-  const wrap = document.getElementById('all-output-wrap');
-
-  // Show loading state while generating thumbnail prompt
-  wrap.innerHTML = `<div style="text-align:center;padding:32px;color:var(--text-dim);">
-    <div class="dots"><span></span><span></span><span></span></div>
-    <div style="margin-top:10px;font-size:12px;letter-spacing:0.08em;">Generating thumbnail prompt...</div>
-  </div>`;
-
-  // Generate thumbnail prompt using the YT uploaded image
-  let thumbPrompt = '(Upload an image in Step 3 to generate thumbnail prompt)';
-  if (state.ytImageB64) {
-    try {
-      const thumbSystem = `You are a professional YouTube thumbnail designer and GPT image prompt engineer specializing in ASMR and ambient channels.
-
-Your job: given a reference image, write a GPT+ (DALL-E 3) prompt that creates a SUPER CLICKABLE YouTube thumbnail with embedded text overlay baked into the image.
-
-VISUAL RULES for maximum CTR:
-- Dramatic, cinematic lighting — dark moody background with ONE warm glowing focal point
-- Rich saturated colors — deep teals, warm ambers, electric blues against dark bg
-- Rain must be VERY visible — bright diagonal rain streaks catching the light
-- Wet reflective surfaces showing warm light puddles
-- Photorealistic, ultra-detailed, cinematic — NOT illustrated or painted
-- 16:9 ratio, landscape orientation
-- No people, no characters
-
-TEXT OVERLAY (baked into the image — this is critical):
-- Analyze the uploaded scene carefully: lighting, mood, setting, emotion
-- Create ONE original 2-4 word phrase that is emotionally perfect for THIS specific scene — make it evocative, sensory, and irresistible to click
-- Examples of the STYLE to aim for (do not copy these): "So Cozy...", "Feel The Rain", "Pure Calm", "Just Rain..." — yours must be unique to the scene
-- Text must appear in THIN, ELEGANT, ALL-CAPS typography — light weight, NOT bold, NOT thick
-- Wide letter-spacing (tracking) — letters spread apart for premium aesthetic feel
-- Color: pure white or warm ivory/cream — NO shadows, NO outlines, NO glow effects
-- Size: LARGE and prominent — must be clearly readable even at small thumbnail size (320px wide). The text should occupy roughly the bottom-left 35% width of the image. Big enough to read instantly, but still elegant
-- Position: center-left, vertically placed at around 65-70% down from the top (below the midpoint but well above the bottom edge) — NOT at the very bottom. Horizontally start at about 8% from the left edge, giving breathing room from the border
-- Font style: thin sans-serif or thin serif — like Cormorant Light or Raleway Thin — extremely elegant, minimal, cinematic
-- NO drop shadows, NO stroke, NO heavy effects — clean and minimal only
-
-Respond ONLY with valid JSON: {"prompt": "..."}`;
-
-      const r = await callClaude(thumbSystem,
-        'Create a GPT+ thumbnail prompt based on this reference image. Make it dramatic, cinematic, and super clickable for YouTube.',
-        state.ytImageB64, state.ytImageType);
-      thumbPrompt = r.prompt;
-      state.thumbPrompt = thumbPrompt;
-    } catch(e) {
-      thumbPrompt = 'Failed to generate thumbnail prompt: ' + e.message;
-    }
-  }
-
-  const sections = [
-    { title:'GPT+ Thumbnail Prompt', dot:'blue', id:'s-thumb', content: thumbPrompt },
-    { title:'YouTube Title', dot:'gold', id:'s-title', content: state.ytTitle || '(not generated yet)', big:true },
-    { title:'Hook Text — First 3s', dot:'gold', id:'s-hook', content: state.ytHook || '(not generated yet)', hook:true },
-    { title:'YouTube Description', dot:'gold', id:'s-desc', content: state.ytDesc || '(not generated yet)' },
-    { title:'Notes', dot:'purple', id:'s-extra', content: state.ytExtra || '(not generated yet)' },
+function buildImageContent(textPrompt){
+  if(!uploadedImageB64) return textPrompt;
+  return [
+    { type:'image', source:{ type:'base64', media_type: uploadedImageType, data: uploadedImageB64 }},
+    { type:'text', text: textPrompt }
   ];
-
-  let html = sections.map(s => `
-    <div class="card" style="margin-bottom:14px;">
-      <div class="card-head">
-        <div class="card-title"><span class="dot ${s.dot}"></span>${s.title}</div>
-        <button class="btn btn-copy" onclick="copyRaw('${s.id}',this)">Copy</button>
-      </div>
-      <div class="card-body">
-        <div class="output-area${s.hook?' hook-big':''}" id="${s.id}"
-          style="${s.big?'font-family:\'Cormorant Garamond\',serif;font-size:17px;':''}${s.hook?'font-family:\'Cormorant Garamond\',serif;font-style:italic;font-size:24px;text-align:center;':''}"
-        >${s.content}</div>
-      </div>
-    </div>
-  `).join('');
-
-  // Tags section
-  html += `<div class="card"><div class="card-head">
-    <div class="card-title"><span class="dot green"></span>Tags (25 keywords)</div>
-    <button class="btn btn-copy" onclick="copyTags(this)">Copy All</button>
-  </div><div class="card-body">
-    <div class="tags-area">${state.ytTags.map(t=>`<span class="tag-chip">${t}</span>`).join('')}</div>
-  </div></div>`;
-
-  wrap.innerHTML = html;
 }
 
-function copyRaw(id, btn) {
-  const text = document.getElementById(id)?.textContent?.trim() || '';
-  copyText(text, btn, 'Copy');
-}
+// ── STEP 1: IMAGE PROMPT ───────────────────────────
+async function generateImagePrompt(){
+  const btn = document.getElementById('genImgBtn');
+  btn.disabled = true; btn.innerHTML = '<span class="hex">⬡</span> Generating...';
+  const s = getSceneData();
+  const prompt = `You are an expert AI image generation prompt writer for ASMR rain cinematic content.
 
-// ---- API Key management ----
-function saveApiKey(val) {
-  localStorage.setItem('anthropic_api_key', val);
-  const status = document.getElementById('api-key-status');
-  if (val.startsWith('sk-ant-')) {
-    status.textContent = '✓ Key tersimpan';
-    status.style.color = 'var(--green)';
-  } else if (val.length > 0) {
-    status.textContent = '⚠ Format salah';
-    status.style.color = 'var(--gold)';
-  } else {
-    status.textContent = '';
+Generate a detailed, ready-to-use GPT-4o image generation prompt for this scene:
+- Location type: ${s.locs || 'nature scene'}
+- Scene description: ${s.desc || 'cinematic rainy scene'}
+- Rain: ${s.rain}
+- Mood: ${s.mood}
+- Lighting: ${s.light}
+- Time: ${s.time}
+- Extra details: ${s.extra}
+
+Rules:
+- No people, no characters, no humans anywhere
+- Ultra-realistic cinematic photography style
+- Perfect for ASMR YouTube channel (ASMR Rain Cinematic)
+- Output ONLY the prompt text, nothing else, no explanation`;
+
+  try {
+    const result = await callClaude([{role:'user', content: prompt}]);
+    document.getElementById('imagePromptOutput').textContent = result.trim();
+    allOutputs.imagePrompt = result.trim();
+  } catch(e){
+    document.getElementById('imagePromptOutput').textContent = 'Error: ' + e.message;
   }
+  btn.disabled = false; btn.innerHTML = '<span class="hex">⬡</span> Generate GPT+ Image Prompt';
 }
-function getApiKey() {
-  return localStorage.getItem('anthropic_api_key') || '';
-}
-// Load saved key on startup
-window.addEventListener('DOMContentLoaded', () => {
-  const saved = getApiKey();
-  if (saved) {
-    document.getElementById('api-key-input').value = saved;
-    saveApiKey(saved);
+
+// ── STEP 2+3: ALL GENERATE ─────────────────────────
+async function generateAll(){
+  if(!getApiKey()){ alert('Please enter your Claude API key first.'); return; }
+
+  const btn = document.getElementById('genAllBtn');
+  btn.disabled = true; btn.innerHTML = '<span class="hex">⬡</span> Generating all outputs...';
+
+  const pw = document.getElementById('progressWrap');
+  const ps = document.getElementById('progressSteps');
+  pw.style.display = 'block';
+
+  const steps = [
+    { id:'s1', label:'Analyzing image & scene...' },
+    { id:'s2', label:'Generating SeeDance 2.0 video prompt...' },
+    { id:'s3', label:'Writing unique YouTube title & hook...' },
+    { id:'s4', label:'Writing description & timestamps...' },
+    { id:'s5', label:'Generating tags & thumbnail prompt...' },
+    { id:'s6', label:'Finalizing category & end screen notes...' },
+  ];
+  ps.innerHTML = steps.map(s=>`
+    <div class="status-row" id="${s.id}">
+      <div class="status-dot pending" id="${s.id}-dot"></div>
+      <span id="${s.id}-text">${s.label}</span>
+    </div>`).join('');
+
+  function setStep(id, state, text){
+    const dot = document.getElementById(id+'-dot');
+    const txt = document.getElementById(id+'-text');
+    if(dot) dot.className = 'status-dot ' + state;
+    if(txt && text) txt.textContent = text;
   }
-});
+
+  const effects = getEffects();
+  const audience = document.getElementById('audienceIntent').value;
+  const duration = document.getElementById('videoDuration').value;
+  const sceneData = getSceneData();
+
+  const hasImage = !!uploadedImageB64;
+  const imageInstruction = hasImage
+    ? 'I am providing a reference image. Analyze it carefully — describe exactly what you see: specific architecture style, materials, vegetation, lighting, colors, atmosphere, location type. Use these SPECIFIC visual details in all your outputs.'
+    : `Scene context from user settings: Location: ${sceneData.locs || 'nature'}, Description: ${sceneData.desc || ''}, Mood: ${sceneData.mood}, Lighting: ${sceneData.light}, Time: ${sceneData.time}.`;
+
+  // ── VIDEO PROMPT ──
+  setStep('s1','running'); setStep('s2','running');
+  try {
+    const visEffects = effects.vis.join('; ');
+    const sndEffects = effects.snd.join('; ');
+    const manualAdd = effects.manual;
+
+    const videoMsgContent = buildImageContent(`${imageInstruction}
+
+Generate a SeeDance 2.0 video generation prompt for this ASMR rain cinematic scene.
+
+Visual effects to include: ${visEffects}
+Sound atmosphere: ${sndEffects}
+${manualAdd ? 'Additional elements: '+manualAdd : ''}
+
+MANDATORY camera rules (include ALL of these verbatim):
+CAMERA: ZERO movement, completely frozen static tripod bolted permanently to ground, absolutely no pan tilt zoom shake or drift, camera is a photograph not a video in terms of movement
+
+MANDATORY audio rules:
+NO thunder NO lightning NO music NO singing NO human voice NO narration
+
+Output ONLY the SeeDance prompt text, nothing else.`);
+
+    const videoPrompt = await callClaude([{role:'user', content: videoMsgContent}], 800);
+    document.getElementById('videoPromptOutput').textContent = videoPrompt.trim();
+    allOutputs.videoPrompt = videoPrompt.trim();
+    setStep('s1','done','Image analyzed ✓'); setStep('s2','done','SeeDance prompt ✓');
+  } catch(e){
+    setStep('s2','error','Error: '+e.message);
+  }
+
+  // ── YOUTUBE TITLE + HOOK ──
+  setStep('s3','running');
+  try {
+    const titleMsgContent = buildImageContent(`${imageInstruction}
+
+Generate a YouTube title and hook text for this ASMR rain video.
+
+Requirements:
+- Audience intent: ${audience}
+- Duration: ${duration}
+- Channel: ASMR Rain Cinematic (YouTube channel)
+- Title MUST be unique and specific to THIS exact scene — describe what makes this scene special
+- Title format: [Specific Unique Scene Name] ASMR Rain • No Music • Just Rain (or variation)
+- Hook: 4-6 words, evocative, poetic, specific to THIS scene's mood and visual. NOT generic.
+- The title and hook must feel different from generic titles like "Rainy Evening ASMR" — use the actual scene details
+
+Respond in this exact format:
+TITLE: [title here]
+HOOK: [hook text here]`);
+
+    const titleResult = await callClaude([{role:'user', content: titleMsgContent}], 300);
+    const titleMatch = titleResult.match(/TITLE:\s*(.+)/);
+    const hookMatch = titleResult.match(/HOOK:\s*(.+)/);
+    const title = titleMatch ? titleMatch[1].trim() : titleResult.split('\n')[0].trim();
+    const hook = hookMatch ? hookMatch[1].trim() : '';
+
+    document.getElementById('ytTitleOutput').textContent = title;
+    document.getElementById('hookOutput').textContent = hook;
+    allOutputs.ytTitle = title; allOutputs.hook = hook;
+    setStep('s3','done','Title & hook ✓');
+  } catch(e){ setStep('s3','error','Error: '+e.message); }
+
+  // ── DESCRIPTION ──
+  setStep('s4','running');
+  try {
+    const descMsgContent = buildImageContent(`${imageInstruction}
+
+Write a YouTube description for this ASMR rain video.
+
+Context:
+- Title: ${allOutputs.ytTitle || 'ASMR Rain Video'}
+- Audience: ${audience}
+- Duration: ${duration}
+- Channel: ASMR Rain Cinematic
+
+Requirements:
+- Opening paragraph: 2-3 sentences, poetic and specific to THIS scene, no generic filler
+- Second paragraph: 1-2 sentences about the experience/benefit
+- Timestamps section (use ⏱ TIMESTAMPS header), realistic for the duration
+- Perfect for: list (✦ Perfect for:)
+- Closing sentence referencing THIS specific scene
+- 3-4 relevant hashtags at end
+- NO music, NO narration, pure rain ambience
+
+Output ONLY the description text.`);
+
+    const desc = await callClaude([{role:'user', content: descMsgContent}], 700);
+    document.getElementById('ytDescOutput').textContent = desc.trim();
+    allOutputs.ytDesc = desc.trim();
+    setStep('s4','done','Description ✓');
+  } catch(e){ setStep('s4','error','Error: '+e.message); }
+
+  // ── TAGS + THUMBNAIL PROMPT ──
+  setStep('s5','running');
+  try {
+    const tagsMsgContent = buildImageContent(`${imageInstruction}
+
+Generate two things for this ASMR rain video:
+
+1. TAGS: Exactly 20 YouTube tags, comma-separated. Mix of: specific scene tags, general ASMR rain tags, sleep/study tags, location tags. Tags must include some that are specific to THIS scene.
+
+2. THUMBNAIL_PROMPT: Write a detailed prompt to create a highly clickable YouTube thumbnail for THIS video. 
+The thumbnail should:
+- Use DOPAMINE color palette: deep teal/cyan + warm amber/gold + deep navy background (colors that trigger curiosity and calm)
+- Show the KEY visual element of this scene (specific building/nature element from the image)
+- Include aesthetic overlay text that matches the scene mood (font style suggestion: elegant serif or handwritten)
+- Suggested text overlay: derive from the hook or scene name — something poetic, 3-5 words max, placed in lower third or corner
+- Lighting: dramatic, cinematic, rain glistens
+- Style: ultra-realistic, cinematic, 16:9 ratio, 1280x720px
+- No generic stock-photo feel — must feel like a premium movie still
+
+Respond in this exact format:
+TAGS: [tag1, tag2, ... tag20]
+THUMBNAIL_PROMPT: [full detailed prompt]`);
+
+    const tagsResult = await callClaude([{role:'user', content: tagsMsgContent}], 600);
+    const tagsMatch = tagsResult.match(/TAGS:\s*([^\n]+(?:\n(?!THUMBNAIL).*)*)/);
+    const thumbMatch = tagsResult.match(/THUMBNAIL_PROMPT:\s*([\s\S]+)/);
+
+    if(tagsMatch){
+      const rawTags = tagsMatch[1].replace(/\n/g,' ');
+      const tags = rawTags.split(',').map(t=>t.trim()).filter(Boolean).slice(0,20);
+      const tagsBox = document.getElementById('tagsBox');
+      tagsBox.innerHTML = tags.map(t=>`<span class="tag-item">${t}</span>`).join('');
+      allOutputs.tags = tags;
+    }
+    if(thumbMatch){
+      const thumbPrompt = thumbMatch[1].trim();
+      document.getElementById('thumbPromptOutput').textContent = thumbPrompt;
+      allOutputs.thumbPrompt = thumbPrompt;
+    }
+    setStep('s5','done','Tags & thumbnail prompt ✓');
+  } catch(e){ setStep('s5','error','Error: '+e.message); }
+
+  // ── CATEGORY / END SCREEN ──
+  setStep('s6','running');
+  try {
+    const catPrompt = `Generate YouTube upload metadata notes for this ASMR rain video (${duration}, ${audience}).
+
+Output in this format:
+CATEGORY: [YouTube category]
+END_SCREEN: [End screen recommendation, 2-3 sentences]
+CARDS: [Cards recommendation during video]
+PREMIERE: [Premiere scheduling tip]
+PLAYLIST: [Playlist suggestion for this video]`;
+
+    const catResult = await callClaude([{role:'user', content: catPrompt}], 300);
+    document.getElementById('categoryOutput').textContent = catResult.trim();
+    allOutputs.category = catResult.trim();
+    setStep('s6','done','All done ✓');
+  } catch(e){ setStep('s6','error','Error: '+e.message); }
+
+  // ── SHOW OUTPUT ──
+  document.getElementById('videoOutputSection').style.display = 'block';
+  buildAllOutput();
+
+  btn.disabled = false;
+  btn.innerHTML = '<span class="hex">⬡</span> Regenerate All';
+}
+
+// ── ALL OUTPUT ─────────────────────────────────────
+function buildAllOutput(){
+  const c = document.getElementById('allOutputContainer');
+  const items = [
+    { label:'GPT+ Image Prompt', key:'imagePrompt', type:'mono' },
+    { label:'SeeDance 2.0 Prompt', key:'videoPrompt', type:'mono' },
+    { label:'YouTube Title', key:'ytTitle', type:'title' },
+    { label:'Hook Text — First 3 Seconds', key:'hook', type:'hook' },
+    { label:'YouTube Description', key:'ytDesc', type:'mono' },
+    { label:'Tags', key:'tags', type:'tags' },
+    { label:'Thumbnail Prompt', key:'thumbPrompt', type:'thumb' },
+    { label:'Category / End Screen / Cards', key:'category', type:'mono' },
+  ];
+  c.innerHTML = items.map(item=>{
+    if(!allOutputs[item.key]) return '';
+    let content = '';
+    if(item.type === 'tags'){
+      const tags = Array.isArray(allOutputs[item.key]) ? allOutputs[item.key] : [];
+      content = `<div class="tags-box">${tags.map(t=>`<span class="tag-item">${t}</span>`).join('')}</div>`;
+    } else if(item.type === 'hook'){
+      content = `<div class="output-box"><div class="output-text hook-text">${escHtml(allOutputs[item.key])}</div><button class="copy-btn" onclick="navigator.clipboard.writeText(${JSON.stringify(allOutputs[item.key])});this.textContent='✓';setTimeout(()=>this.textContent='COPY',1500)">COPY</button></div>`;
+    } else if(item.type === 'thumb'){
+      content = `<div class="thumb-prompt"><div class="thumb-prompt-text">${escHtml(allOutputs[item.key])}</div></div>`;
+    } else {
+      const cls = item.type === 'title' ? 'title-text' : '';
+      content = `<div class="output-box"><div class="output-text ${cls}">${escHtml(allOutputs[item.key])}</div><button class="copy-btn" onclick="navigator.clipboard.writeText(${JSON.stringify(allOutputs[item.key])});this.textContent='✓';setTimeout(()=>this.textContent='COPY',1500)">COPY</button></div>`;
+    }
+    return `<div class="all-output-item">
+      <div class="all-output-header"><span class="all-output-label">${item.label}</span></div>
+      <div class="all-output-body">${content}</div>
+    </div>`;
+  }).join('');
+}
+
+function escHtml(s){ return String(s).replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;'); }
+
+// ── COPY HELPERS ───────────────────────────────────
+function copyOutput(id, btn){
+  const text = document.getElementById(id).textContent;
+  navigator.clipboard.writeText(text).then(()=>{
+    btn.textContent='✓'; btn.classList.add('copied');
+    setTimeout(()=>{ btn.textContent='COPY'; btn.classList.remove('copied'); },1500);
+  });
+}
+function copyText(id){
+  const text = document.getElementById(id).textContent;
+  navigator.clipboard.writeText(text);
+}
+function copyTags(){
+  const tags = allOutputs.tags || [];
+  navigator.clipboard.writeText(tags.join(', '));
+}
 </script>
 </body>
 </html>
