@@ -856,8 +856,17 @@ PLAYLIST: [Playlist suggestion for this video]`;
 }
 
 // ── ALL OUTPUT ─────────────────────────────────────
+let _copyStore = {};
+function copyStored(key){ 
+  const txt = _copyStore[key];
+  if(!txt) return;
+  navigator.clipboard.writeText(txt);
+  const btn = document.getElementById('copybtn-'+key);
+  if(btn){ btn.textContent='✓'; setTimeout(()=>btn.textContent='COPY',1500); }
+}
 function buildAllOutput(){
   const c = document.getElementById('allOutputContainer');
+  _copyStore = {};
   const items = [
     { label:'GPT+ Image Prompt', key:'imagePrompt', type:'mono' },
     { label:'SeeDance 2.0 Prompt', key:'videoPrompt', type:'mono' },
@@ -870,17 +879,26 @@ function buildAllOutput(){
   ];
   c.innerHTML = items.map(item=>{
     if(!allOutputs[item.key]) return '';
+    const k = item.key;
     let content = '';
     if(item.type === 'tags'){
-      const tags = Array.isArray(allOutputs[item.key]) ? allOutputs[item.key] : [];
-      content = `<div class="tags-box">${tags.map(t=>`<span class="tag-item">${t}</span>`).join('')}</div>`;
+      const tags = Array.isArray(allOutputs[k]) ? allOutputs[k] : [];
+      _copyStore[k] = tags.join(', ');
+      content = `<div class="tags-box">${tags.map(t=>`<span class="tag-item">${escHtml(t)}</span>`).join('')}</div>
+        <button class="copy-btn" id="copybtn-${k}" style="position:static;margin-top:8px" onclick="copyStored('${k}')">COPY ALL</button>`;
     } else if(item.type === 'hook'){
-      content = `<div class="output-box"><div class="output-text hook-text">${escHtml(allOutputs[item.key])}</div><button class="copy-btn" onclick="navigator.clipboard.writeText(${JSON.stringify(allOutputs[item.key])});this.textContent='✓';setTimeout(()=>this.textContent='COPY',1500)">COPY</button></div>`;
+      _copyStore[k] = allOutputs[k];
+      content = `<div class="output-box"><div class="output-text hook-text">${escHtml(allOutputs[k])}</div>
+        <button class="copy-btn" id="copybtn-${k}" onclick="copyStored('${k}')">COPY</button></div>`;
     } else if(item.type === 'thumb'){
-      content = `<div class="thumb-prompt"><div class="thumb-prompt-text">${escHtml(allOutputs[item.key])}</div></div>`;
+      _copyStore[k] = allOutputs[k];
+      content = `<div class="thumb-prompt"><div class="thumb-prompt-text">${escHtml(allOutputs[k])}</div></div>
+        <button class="copy-btn" id="copybtn-${k}" style="position:static;margin-top:10px" onclick="copyStored('${k}')">COPY</button>`;
     } else {
+      _copyStore[k] = allOutputs[k];
       const cls = item.type === 'title' ? 'title-text' : '';
-      content = `<div class="output-box"><div class="output-text ${cls}">${escHtml(allOutputs[item.key])}</div><button class="copy-btn" onclick="navigator.clipboard.writeText(${JSON.stringify(allOutputs[item.key])});this.textContent='✓';setTimeout(()=>this.textContent='COPY',1500)">COPY</button></div>`;
+      content = `<div class="output-box"><div class="output-text ${cls}">${escHtml(allOutputs[k])}</div>
+        <button class="copy-btn" id="copybtn-${k}" onclick="copyStored('${k}')">COPY</button></div>`;
     }
     return `<div class="all-output-item">
       <div class="all-output-header"><span class="all-output-label">${item.label}</span></div>
