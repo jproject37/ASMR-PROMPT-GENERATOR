@@ -30,6 +30,13 @@ body{background:var(--bg);color:var(--text);font-family:'Inter',sans-serif;font-
 .api-input:focus{border-color:var(--teal)}
 .api-status{font-size:11px;font-family:'JetBrains Mono',monospace;color:var(--text3)}
 .api-status.ok{color:var(--teal)}
+.provider-btn{padding:5px 12px;border:1px solid var(--border2);background:var(--surface2);color:var(--text2);font-size:11px;font-weight:600;border-radius:4px;cursor:pointer;transition:all .15s}
+.provider-btn:hover{border-color:var(--teal);color:var(--text)}
+.provider-btn.active{border-color:var(--teal);background:var(--teal-dim);color:var(--teal)}
+.open-btn{display:inline-flex;align-items:center;gap:6px;padding:8px 14px;border:1px solid var(--border2);background:var(--surface2);color:var(--text2);font-size:12px;font-weight:600;border-radius:4px;cursor:pointer;transition:all .15s;text-decoration:none;margin-top:8px;margin-right:6px}
+.open-btn:hover{border-color:var(--teal);color:var(--teal)}
+.open-btn.flow{border-color:rgba(201,168,76,0.4);color:var(--gold)}
+.open-btn.flow:hover{border-color:var(--gold);background:var(--gold-dim)}
 
 /* TABS */
 .tabs{display:flex;border-bottom:1px solid var(--border);background:var(--surface3);overflow-x:auto}
@@ -168,10 +175,16 @@ body{background:var(--bg);color:var(--text);font-family:'Inter',sans-serif;font-
   <div class="header-sub">Image Generation · Video Prompt · YouTube Package</div>
 </div>
 
-<div class="api-bar">
+<div class="api-bar" style="flex-wrap:wrap;gap:10px;align-items:center">
+  <span class="api-label">🤖 Provider</span>
+  <div style="display:flex;gap:6px">
+    <button class="provider-btn active" id="provAnthropic" onclick="setProvider('anthropic')">Anthropic</button>
+    <button class="provider-btn" id="provGrok" onclick="setProvider('grok')">Grok <span style="font-size:9px;color:#4ade80;font-weight:700">FREE</span></button>
+  </div>
   <span class="api-label">🔑 API Key</span>
-  <input class="api-input" type="password" id="apiKeyInput" placeholder="sk-ant-..." autocomplete="off">
-  <span class="api-status" id="apiStatus">Enter key to enable AI generation</span>
+  <input class="api-input" type="password" id="apiKeyInput" placeholder="sk-ant-..." autocomplete="off" oninput="validateKey()">
+  <span class="api-status" id="apiStatus">Enter key</span>
+  <a id="getKeyLink" href="https://console.anthropic.com" target="_blank" style="font-size:10px;color:var(--teal);text-decoration:none;white-space:nowrap">Get key →</a>
 </div>
 
 <div class="tabs">
@@ -274,8 +287,12 @@ body{background:var(--bg);color:var(--text);font-family:'Inter',sans-serif;font-
         <div class="output-text" id="imagePromptOutput">—</div>
         <button class="copy-btn" onclick="copyOutput('imagePromptOutput',this)">COPY</button>
       </div>
-      <p class="hint">Generate image in GPT+, then continue to Step 2 →</p>
-      <button class="next-btn primary" onclick="switchTab(1)">→ Next: Video + YouTube Package</button>
+      <p class="hint">Prompt ter-copy otomatis saat klik tombol di bawah → tinggal Ctrl+V / paste di GPT+ atau Flow</p>
+      <div style="margin-top:10px;display:flex;flex-wrap:wrap;gap:8px;align-items:center">
+        <a class="open-btn" onclick="copyAndOpen('imagePromptOutput','https://chatgpt.com')" href="javascript:void(0)">🎨 Copy + Open GPT+</a>
+        <a class="open-btn flow" onclick="copyAndOpen('imagePromptOutput','https://labs.google/fx/id/tools/flow/project/f8d31b59-796a-4135-90e7-c9fb2dd61467')" href="javascript:void(0)">🌊 Copy + Open Flow</a>
+        <button class="next-btn primary" onclick="switchTab(1)" style="margin-top:0">→ Step 2: Video + YouTube</button>
+      </div>
     </div>
   </div>
 
@@ -510,21 +527,58 @@ body{background:var(--bg);color:var(--text);font-family:'Inter',sans-serif;font-
 let uploadedImageB64 = null;
 let uploadedImageType = 'image/jpeg';
 let allOutputs = {};
+let currentProvider = 'anthropic';
 
-// ── API KEY ────────────────────────────────────────
-document.getElementById('apiKeyInput').addEventListener('input', function(){
-  const v = this.value.trim();
+// ── PROVIDER ───────────────────────────────────────
+function setProvider(p){
+  currentProvider = p;
+  document.getElementById('provAnthropic').classList.toggle('active', p==='anthropic');
+  document.getElementById('provGrok').classList.toggle('active', p==='grok');
+  const input = document.getElementById('apiKeyInput');
+  const link = document.getElementById('getKeyLink');
+  if(p==='anthropic'){
+    input.placeholder='sk-ant-...';
+    link.href='https://console.anthropic.com';
+    link.textContent='Get Anthropic key →';
+  } else {
+    input.placeholder='xai-...';
+    link.href='https://console.x.ai';
+    link.textContent='Get Grok key (free) →';
+  }
+  input.value='';
+  document.getElementById('apiStatus').textContent='Enter key';
+  document.getElementById('apiStatus').className='api-status';
+}
+
+function validateKey(){
+  const v = document.getElementById('apiKeyInput').value.trim();
   const s = document.getElementById('apiStatus');
-  if(v.startsWith('sk-ant-') && v.length > 20){
+  const isAnt = currentProvider==='anthropic';
+  const isGrok = currentProvider==='grok';
+  if((isAnt && v.startsWith('sk-ant-') && v.length>20) || (isGrok && v.startsWith('xai-') && v.length>10)){
     s.textContent = '✓ Key recognized'; s.className = 'api-status ok';
   } else if(v.length > 5){
-    s.textContent = 'Key format unrecognized'; s.className = 'api-status';
+    s.textContent = 'Check key format'; s.className = 'api-status';
   } else {
-    s.textContent = 'Enter key to enable AI generation'; s.className = 'api-status';
+    s.textContent = 'Enter key'; s.className = 'api-status';
   }
-});
+}
 
 function getApiKey(){ return document.getElementById('apiKeyInput').value.trim(); }
+
+// ── COPY + OPEN ─────────────────────────────────────
+function copyAndOpen(outputId, url){
+  const text = document.getElementById(outputId).textContent;
+  if(text && text !== '—'){
+    navigator.clipboard.writeText(text).then(()=>{
+      window.open(url, '_blank');
+    }).catch(()=>{
+      window.open(url, '_blank');
+    });
+  } else {
+    alert('Generate prompt dulu sebelum membuka!');
+  }
+}
 
 // ── TABS ───────────────────────────────────────────
 function switchTab(idx){
@@ -594,22 +648,42 @@ function getEffects(){
   return { vis, snd, manual };
 }
 
-// ── CLAUDE API ─────────────────────────────────────
+// ── AI API (Anthropic or Grok) ──────────────────────
 async function callClaude(messages, maxTokens=1200){
   const key = getApiKey();
-  if(!key) throw new Error('No API key');
-  const body = { model:'claude-sonnet-4-5', max_tokens: maxTokens, messages };
-  if(uploadedImageB64 && messages.some(m=> Array.isArray(m.content))){
-    // already has image blocks
+  if(!key) throw new Error('No API key — enter your key first');
+
+  if(currentProvider === 'grok'){
+    // Grok xAI API (OpenAI-compatible)
+    // Strip image blocks for Grok (text only)
+    const textMessages = messages.map(m=>{
+      if(Array.isArray(m.content)){
+        const text = m.content.filter(b=>b.type==='text').map(b=>b.text).join(' ');
+        return {...m, content: text};
+      }
+      return m;
+    });
+    const body = { model:'grok-3-mini', max_tokens: maxTokens, messages: textMessages };
+    const res = await fetch('https://api.x.ai/v1/chat/completions',{
+      method:'POST',
+      headers:{'Content-Type':'application/json','Authorization':'Bearer '+key},
+      body: JSON.stringify(body)
+    });
+    const data = await res.json();
+    if(!data.choices || !data.choices[0]) throw new Error(data.error?.message || 'Grok API error');
+    return data.choices[0].message.content || '';
+  } else {
+    // Anthropic Claude
+    const body = { model:'claude-sonnet-4-5', max_tokens: maxTokens, messages };
+    const res = await fetch('https://api.anthropic.com/v1/messages',{
+      method:'POST',
+      headers:{'Content-Type':'application/json','x-api-key':key,'anthropic-version':'2023-06-01','anthropic-dangerous-direct-browser-access':'true'},
+      body: JSON.stringify(body)
+    });
+    const data = await res.json();
+    if(!data.content || !data.content[0]) throw new Error(data.error?.message || 'API error');
+    return data.content.map(b=>b.text||'').join('');
   }
-  const res = await fetch('https://api.anthropic.com/v1/messages',{
-    method:'POST',
-    headers:{'Content-Type':'application/json','x-api-key':key,'anthropic-version':'2023-06-01','anthropic-dangerous-direct-browser-access':'true'},
-    body: JSON.stringify(body)
-  });
-  const data = await res.json();
-  if(!data.content || !data.content[0]) throw new Error(data.error?.message || 'API error');
-  return data.content.map(b=>b.text||'').join('');
 }
 
 function buildImageContent(textPrompt){
