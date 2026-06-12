@@ -547,7 +547,7 @@ function setProvider(p){
     link.href='https://console.x.ai';
     link.textContent='Get Grok key (free) →';
   } else {
-    input.placeholder='AIza...';
+    input.placeholder='AQ.Ab8...';
     link.href='https://aistudio.google.com/apikey';
     link.textContent='Get Google AI key (free) →';
   }
@@ -562,7 +562,7 @@ function validateKey(){
   const isAnt = currentProvider==='anthropic';
   const isGrok = currentProvider==='grok';
   const isGoogle = currentProvider==='google';
-  if((isAnt && v.startsWith('sk-ant-') && v.length>20) || (isGrok && v.startsWith('xai-') && v.length>10) || (isGoogle && v.startsWith('AIza') && v.length>20)){
+  if((isAnt && v.startsWith('sk-ant-') && v.length>20) || (isGrok && v.startsWith('xai-') && v.length>10) || (isGoogle && v.length>20)){
     s.textContent = '✓ Key recognized'; s.className = 'api-status ok';
   } else if(v.length > 5){
     s.textContent = 'Check key format'; s.className = 'api-status';
