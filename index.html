@@ -179,7 +179,7 @@ body{background:var(--bg);color:var(--text);font-family:'Inter',sans-serif;font-
   <span class="api-label">🤖 Provider</span>
   <div style="display:flex;gap:6px">
     <button class="provider-btn active" id="provAnthropic" onclick="setProvider('anthropic')">Anthropic</button>
-    <button class="provider-btn" id="provGrok" onclick="setProvider('grok')">Grok <span style="font-size:9px;color:#4ade80;font-weight:700">FREE</span></button>
+    <button class="provider-btn" id="provGrok" onclick="setProvider('grok')">OpenRouter <span style="font-size:9px;color:#4ade80;font-weight:700">FREE</span></button>
   </div>
   <span class="api-label">🔑 API Key</span>
   <input class="api-input" type="password" id="apiKeyInput" placeholder="sk-ant-..." autocomplete="off" oninput="validateKey()">
@@ -541,9 +541,9 @@ function setProvider(p){
     link.href='https://console.anthropic.com';
     link.textContent='Get Anthropic key →';
   } else {
-    input.placeholder='xai-...';
-    link.href='https://console.x.ai';
-    link.textContent='Get Grok key (free) →';
+    input.placeholder='sk-or-v1-...';
+    link.href='https://openrouter.ai/keys';
+    link.textContent='Get OpenRouter key (free) →';
   }
   input.value='';
   document.getElementById('apiStatus').textContent='Enter key';
@@ -555,7 +555,7 @@ function validateKey(){
   const s = document.getElementById('apiStatus');
   const isAnt = currentProvider==='anthropic';
   const isGrok = currentProvider==='grok';
-  if((isAnt && v.startsWith('sk-ant-') && v.length>20) || (isGrok && v.startsWith('xai-') && v.length>10)){
+  if((isAnt && v.startsWith('sk-ant-') && v.length>20) || (isGrok && v.startsWith('sk-or-') && v.length>10)){
     s.textContent = '✓ Key recognized'; s.className = 'api-status ok';
   } else if(v.length > 5){
     s.textContent = 'Check key format'; s.className = 'api-status';
@@ -654,8 +654,7 @@ async function callClaude(messages, maxTokens=1200){
   if(!key) throw new Error('No API key — enter your key first');
 
   if(currentProvider === 'grok'){
-    // Grok xAI API (OpenAI-compatible)
-    // Strip image blocks for Grok (text only)
+    // OpenRouter API — support CORS from browser, free tier available
     const textMessages = messages.map(m=>{
       if(Array.isArray(m.content)){
         const text = m.content.filter(b=>b.type==='text').map(b=>b.text).join(' ');
@@ -663,14 +662,19 @@ async function callClaude(messages, maxTokens=1200){
       }
       return m;
     });
-    const body = { model:'grok-3-mini', max_tokens: maxTokens, messages: textMessages };
-    const res = await fetch('https://api.x.ai/v1/chat/completions',{
+    const body = { model:'meta-llama/llama-3.3-70b-instruct:free', max_tokens: maxTokens, messages: textMessages };
+    const res = await fetch('https://openrouter.ai/api/v1/chat/completions',{
       method:'POST',
-      headers:{'Content-Type':'application/json','Authorization':'Bearer '+key},
+      headers:{
+        'Content-Type':'application/json',
+        'Authorization':'Bearer '+key,
+        'HTTP-Referer':'https://jproject37.github.io/ASMR-PROMPT-GENERATOR',
+        'X-Title':'ASMR Rain Prompt Studio'
+      },
       body: JSON.stringify(body)
     });
     const data = await res.json();
-    if(!data.choices || !data.choices[0]) throw new Error(data.error?.message || 'Grok API error');
+    if(!data.choices || !data.choices[0]) throw new Error(data.error?.message || 'OpenRouter API error');
     return data.choices[0].message.content || '';
   } else {
     // Anthropic Claude
