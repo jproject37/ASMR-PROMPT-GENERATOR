@@ -176,18 +176,11 @@ body{background:var(--bg);color:var(--text);font-family:'Inter',sans-serif;font-
 </div>
 
 <div class="api-bar" style="flex-wrap:wrap;gap:10px;align-items:center">
-  <span class="api-label">🤖 Provider</span>
-  <div style="display:flex;gap:6px">
-    <button class="provider-btn active" id="provAnthropic" onclick="setProvider('anthropic')">Anthropic</button>
-    <button class="provider-btn" id="provGrok" onclick="setProvider('grok')">Grok <span style="font-size:9px;color:#4ade80;font-weight:700">FREE</span></button>
-    <button class="provider-btn" id="provGoogle" onclick="setProvider('google')">Google AI <span style="font-size:9px;color:#4ade80;font-weight:700">FREE</span></button>
-  </div>
-  <span class="api-label">🔑 API Key</span>
+  <span class="api-label">&#x1F511; Anthropic API Key</span>
   <input class="api-input" type="password" id="apiKeyInput" placeholder="sk-ant-..." autocomplete="off" oninput="validateKey()">
   <span class="api-status" id="apiStatus">Enter key</span>
-  <a id="getKeyLink" href="https://console.anthropic.com" target="_blank" style="font-size:10px;color:var(--teal);text-decoration:none;white-space:nowrap">Get key →</a>
+  <a href="https://console.anthropic.com" target="_blank" style="font-size:10px;color:var(--teal);text-decoration:none;white-space:nowrap">Get key &#x2192;</a>
 </div>
-
 <div class="tabs">
   <button class="tab active" data-tab="0" onclick="switchTab(0)">
     <span class="tab-num">1</span>
@@ -528,44 +521,14 @@ body{background:var(--bg);color:var(--text);font-family:'Inter',sans-serif;font-
 let uploadedImageB64 = null;
 let uploadedImageType = 'image/jpeg';
 let allOutputs = {};
-let currentProvider = 'anthropic';
-
-// ── PROVIDER ───────────────────────────────────────
-function setProvider(p){
-  currentProvider = p;
-  document.getElementById('provAnthropic').classList.toggle('active', p==='anthropic');
-  document.getElementById('provGrok').classList.toggle('active', p==='grok');
-  document.getElementById('provGoogle').classList.toggle('active', p==='google');
-  const input = document.getElementById('apiKeyInput');
-  const link = document.getElementById('getKeyLink');
-  if(p==='anthropic'){
-    input.placeholder='sk-ant-...';
-    link.href='https://console.anthropic.com';
-    link.textContent='Get Anthropic key →';
-  } else if(p==='grok'){
-    input.placeholder='xai-...';
-    link.href='https://console.x.ai';
-    link.textContent='Get Grok key (free) →';
-  } else {
-    input.placeholder='AQ.Ab8...';
-    link.href='https://aistudio.google.com/apikey';
-    link.textContent='Get Google AI key (free) →';
-  }
-  input.value='';
-  document.getElementById('apiStatus').textContent='Enter key';
-  document.getElementById('apiStatus').className='api-status';
-}
-
+// ── API KEY ────────────────────────────────────────
 function validateKey(){
   const v = document.getElementById('apiKeyInput').value.trim();
   const s = document.getElementById('apiStatus');
-  const isAnt = currentProvider==='anthropic';
-  const isGrok = currentProvider==='grok';
-  const isGoogle = currentProvider==='google';
-  if((isAnt && v.startsWith('sk-ant-') && v.length>20) || (isGrok && v.startsWith('xai-') && v.length>10) || (isGoogle && v.length>20)){
-    s.textContent = '✓ Key recognized'; s.className = 'api-status ok';
+  if(v.startsWith('sk-ant-') && v.length > 20){
+    s.textContent = '✓ Ready'; s.className = 'api-status ok';
   } else if(v.length > 5){
-    s.textContent = 'Check key format'; s.className = 'api-status';
+    s.textContent = 'Check format'; s.className = 'api-status';
   } else {
     s.textContent = 'Enter key'; s.className = 'api-status';
   }
@@ -655,66 +618,24 @@ function getEffects(){
   return { vis, snd, manual };
 }
 
-// ── AI API (Anthropic or Grok) ──────────────────────
+// ── CLAUDE API ─────────────────────────────────────
 async function callClaude(messages, maxTokens=1200){
   const key = getApiKey();
-  if(!key) throw new Error('No API key — enter your key first');
-
-  if(currentProvider === 'grok'){
-    // Grok xAI API
-    const textMessages = messages.map(m=>{
-      if(Array.isArray(m.content)){
-        const text = m.content.filter(b=>b.type==='text').map(b=>b.text).join(' ');
-        return {...m, content: text};
-      }
-      return m;
-    });
-    const body = { model:'grok-3-mini', max_tokens: maxTokens, messages: textMessages };
-    const res = await fetch('https://api.x.ai/v1/chat/completions',{
-      method:'POST',
-      headers:{
-        'Content-Type':'application/json',
-        'Authorization':'Bearer '+key
-      },
-      body: JSON.stringify(body)
-    });
-    const data = await res.json();
-    if(!data.choices || !data.choices[0]) throw new Error(data.error?.message || 'Grok API error');
-    return data.choices[0].message.content || '';
-  } else if(currentProvider === 'google'){
-    // Google Gemini API
-    const textMessages = messages.map(m=>{
-      if(Array.isArray(m.content)){
-        const text = m.content.filter(b=>b.type==='text').map(b=>b.text).join(' ');
-        return {...m, content: text};
-      }
-      return m;
-    });
-    const geminiMsgs = textMessages.map(m=>({
-      role: m.role==='assistant'?'model':'user',
-      parts:[{text: m.content}]
-    }));
-    const body = { contents: geminiMsgs, generationConfig:{ maxOutputTokens: maxTokens } };
-    const res = await fetch(`https://generativelanguage.googleapis.com/v1beta/models/gemini-2.5-flash:generateContent?key=${key}`,{
-      method:'POST',
-      headers:{'Content-Type':'application/json'},
-      body: JSON.stringify(body)
-    });
-    const data = await res.json();
-    if(!data.candidates || !data.candidates[0]) throw new Error(data.error?.message || 'Google AI error');
-    return data.candidates[0].content.parts.map(p=>p.text||'').join('');
-  } else {
-    // Anthropic Claude
-    const body = { model:'claude-sonnet-4-5', max_tokens: maxTokens, messages };
-    const res = await fetch('https://api.anthropic.com/v1/messages',{
-      method:'POST',
-      headers:{'Content-Type':'application/json','x-api-key':key,'anthropic-version':'2023-06-01','anthropic-dangerous-direct-browser-access':'true'},
-      body: JSON.stringify(body)
-    });
-    const data = await res.json();
-    if(!data.content || !data.content[0]) throw new Error(data.error?.message || 'API error');
-    return data.content.map(b=>b.text||'').join('');
-  }
+  if(!key) throw new Error('Enter your Anthropic API key first');
+  const body = { model:'claude-sonnet-4-5', max_tokens: maxTokens, messages };
+  const res = await fetch('https://api.anthropic.com/v1/messages',{
+    method:'POST',
+    headers:{
+      'Content-Type':'application/json',
+      'x-api-key':key,
+      'anthropic-version':'2023-06-01',
+      'anthropic-dangerous-direct-browser-access':'true'
+    },
+    body: JSON.stringify(body)
+  });
+  const data = await res.json();
+  if(!data.content || !data.content[0]) throw new Error(data.error?.message || 'API error');
+  return data.content.map(b=>b.text||'').join('');
 }
 
 function buildImageContent(textPrompt){
